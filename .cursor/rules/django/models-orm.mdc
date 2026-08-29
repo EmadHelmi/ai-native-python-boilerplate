@@ -1,0 +1,119 @@
+---
+globs: "**/*.py"
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Django models and ORM
+
+## Query behavior and performance
+
+- Understand the query shape of ORM code on performance-sensitive paths.
+  Prevent accidental N+1 queries and unnecessary data loading,
+  but inspect or profile queries before introducing non-obvious optimizations.
+
+- Use `select_related()` for known single-valued relationships
+  and `prefetch_related()` for multi-valued, reverse, or custom-prefetch relationships
+  when those related objects will actually be consumed.
+
+- Specify eager-loaded relationships deliberately.
+  Do not broadly fetch every reachable relation merely to prevent possible future queries.
+
+- Treat eager loading as a query-design decision, not a blanket optimization.
+  Avoid unused prefetches, excessively broad relation graphs, or large related collections
+  whose memory and query cost outweighs the saved round trips.
+
+- When supported by the project's Django version, consider fetch modes for access patterns
+  where relationship usage is difficult to predict or accidental lazy loading should be detected.
+  Do not enable broader fetching globally without understanding its query and memory behavior.
+
+- Use `only()` and `defer()` only when measured data width or conversion cost justifies them.
+  Do not use field deferral as a routine optimization.
+
+- Use `values()`, `values_list()`, annotations, and database-side aggregation
+  when a read path needs data rather than model behavior.
+  Do not instantiate full model objects merely to obtain a projection or aggregate.
+
+- Account for QuerySet laziness and evaluation.
+  Use `exists()`, `count()`, or `contains()` when only that answer is needed;
+  avoid an extra query when the same queryset will immediately be evaluated anyway.
+
+- When only a related object's identifier is needed,
+  use the stored `<field>_id` value rather than loading the related object solely for its key.
+
+## QuerySets and managers
+
+- Put reusable persistence query composition in custom `QuerySet` or manager methods
+  when repeated query intent benefits from a clear name.
+
+- Keep managers and querysets focused on persistence queries and database-side operations.
+  Do not turn them into generic application services or side-effect coordinators.
+
+- Prefer a small vocabulary of meaningful reusable queries
+  over one manager method for every possible combination of filters.
+
+## Writes and bulk operations
+
+- Use `QuerySet.update()` for deliberate database-side updates
+  when model `save()` behavior and save signals are not part of the required semantics.
+  Do not use bulk updates to bypass invariants or behavior that must run per object.
+
+- Use `save(update_fields=...)` when limiting persisted fields has a clear correctness
+  or performance benefit, and keep the field list consistent with field `pre_save()` behavior.
+
+- Prefer bulk ORM operations when many independent rows can be written with equivalent semantics,
+  while accounting explicitly for model methods and signals they bypass.
+
+- Batch large bulk operations when query size, parameter limits, memory use,
+  lock duration, or transaction size would otherwise become material.
+
+- Do not rely on `get_or_create()` or `update_or_create()` as a substitute for database uniqueness.
+  Back concurrent uniqueness assumptions with database constraints.
+
+- Prefer database expressions such as `F()` when an update should be derived atomically
+  from the current stored value.
+  Avoid unnecessary Python read-modify-write cycles on concurrently mutable fields.
+
+## Constraints and indexes
+
+- Express critical persistence invariants with database constraints
+  when the database can enforce them reliably.
+  Application and domain validation should not be the sole protection against concurrent invalid writes.
+
+- Prefer explicit `UniqueConstraint` and `CheckConstraint`
+  when uniqueness or row-level validity forms part of the persistence contract.
+
+- Prefer `UniqueConstraint` over legacy `unique_together` for new model constraints.
+
+- Add indexes from demonstrated query, ordering, join, or uniqueness requirements.
+  Do not create indexes mechanically without considering selectivity, write cost,
+  composite ordering, and target-database capabilities.
+
+- Prefer `Meta.indexes` when an explicit model index or advanced index configuration is appropriate.
+  Use field-level `db_index` for straightforward cases where it remains the clearest representation.
+
+- Add model-level default ordering only when callers should genuinely receive that ordering by default.
+  Account for its cost and its effect on queries that do not explicitly request ordering.
+
+## Relationships
+
+- Choose `ForeignKey.on_delete` from relationship ownership and domain semantics.
+  Do not apply one deletion policy globally merely for consistency.
+
+- When choosing between Django-managed and database-managed delete behavior,
+  account for performance, signal semantics, portability, and target-database capabilities.
+
+- Preserve database referential constraints by default.
+  Use `db_constraint=False` only for an explicit architectural or legacy-data reason
+  and only when the application deliberately owns the resulting integrity risk.
+
+## Model choices
+
+- Use Django choice enums for finite values owned by the codebase
+  when they improve clarity and validation.
+
+- Do not encode externally managed, user-defined, or independently evolving values as model choices.
+
+- Choose the stored representation from domain meaning and compatibility requirements;
+  do not choose integers merely for storage compactness when the number has no meaningful contract.

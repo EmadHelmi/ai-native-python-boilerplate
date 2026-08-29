@@ -1,0 +1,43 @@
+name: Feature request
+description: Propose a reusable improvement to the boilerplate.
+title: "feat: "
+body:
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Preflight checks
+      options:
+        - label: I searched existing issues and proposals.
+          required: true
+        - label: This request is reusable across projects and is not application-specific.
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or need
+      description: Explain the concrete problem without prescribing a solution prematurely.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed outcome
+      description: Describe the behavior or developer experience you want.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe existing workarounds or viable alternatives when known.
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Reusability and scope
+      description: Explain why the change belongs in the shared boilerplate.
+    validations:
+      required: true

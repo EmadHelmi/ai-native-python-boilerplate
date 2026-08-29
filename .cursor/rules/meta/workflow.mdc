@@ -1,0 +1,30 @@
+---
+alwaysApply: true
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Human-agent change workflow
+
+## Planning and approval
+
+- Before implementing a non-trivial change, analyze the requested outcome
+  and decompose the work into meaningful implementation branches or phases.
+
+- Present the proposed implementation plan before modifying project files.
+  Each planned step should describe:
+  - the goal of the change,
+  - the affected area or files,
+  - the expected dependency/order between changes,
+  - and any important trade-offs or risks.
+
+- Wait for explicit approval of the implementation plan before making code or configuration changes.
+
+- Keep implementation steps small and independently reviewable.
+  Avoid combining unrelated changes into one large modification.
+
+- Do not create artificial planning steps for trivial changes.
+  Apply this workflow proportionally based on the scope and risk of the task.
+
+- When new information discovered during implementation materially changes the plan,
+  stop and present the updated plan before continuing.

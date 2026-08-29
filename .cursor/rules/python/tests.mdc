@@ -1,0 +1,130 @@
+---
+globs: "**/tests.py,**/tests/**/*.py,**/test_*.py,**/*_test.py"
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Python tests
+
+- Use the testing framework and fixture style already configured by the repository.
+  Do not introduce another test framework for a local change.
+
+- Give each test one clear behavioral reason to fail.
+  Multiple assertions are fine when they jointly describe the same observable behavior.
+
+- Structure tests so setup, action, and expected outcome are easy to distinguish.
+  Use Given/When/Then or Arrange/Act/Assert as a mental model; comments are optional.
+
+- Assert observable behavior such as return values, raised failures, persisted state,
+  emitted effects, or interactions that are part of a stable public contract.
+
+- Avoid asserting private helper calls, implementation order, or incidental wiring
+  unless those interactions are themselves part of the contract.
+
+- When testing failures, assert the exception type and structured failure information
+  that is part of the contract.
+  Avoid asserting exact human-readable exception text unless the text itself is contractual.
+
+- Keep tests deterministic and independent of execution order.
+  Control external services, clocks, randomness, environment, and other unstable boundaries
+  through explicit test setup or the project's established tools.
+
+- Do not use arbitrary sleeps, retries, or widened timeouts to hide race conditions or flaky tests.
+  Synchronize on the behavior or state transition the test actually depends on.
+
+- Do not let unit or ordinary application tests access external networks or services accidentally.
+  External integration tests must make that dependency explicit.
+
+- Prefer realistic behavior over excessive mocking.
+  Mock, stub, or fake boundaries rather than every internal collaborator.
+
+- Prefer explicit dependency injection over broad monkeypatching for code the project controls.
+  Use patching for genuine external, framework, or legacy boundaries when appropriate.
+
+- When patching is necessary, patch the reference used by the code under test,
+  not merely the location where the original object was defined.
+
+- Keep test doubles faithful to the boundary contract they replace.
+  They should not accept behavior that the real dependency would reject.
+
+- Do not reproduce the production algorithm to calculate expected results.
+  Use explicit expected values or an independently derived oracle.
+
+- Keep fixtures focused on establishing reusable test context.
+  Avoid large fixtures whose hidden setup determines the behavior being tested.
+
+- Use the narrowest practical fixture lifetime for mutable state.
+  Wider-scoped fixtures must not introduce hidden shared mutation between tests.
+
+- Use autouse fixtures only for genuinely cross-cutting test-environment behavior.
+  Prefer explicit fixtures when setup materially affects the scenario.
+
+- Accept some duplication when it keeps a test understandable in isolation.
+  Helpers and fixtures should reduce noisy setup without hiding behavior.
+
+- Use parameterization or subtests when multiple cases exercise the same behavior
+  with distinct inputs and expected outcomes.
+  Keep materially different scenarios as separate tests.
+
+- Test behavior at the lowest level that can prove it reliably,
+  but use integration tests when correctness depends on framework, database,
+  serialization, transaction, or adapter semantics.
+
+- Use coverage as a signal for untested behavior, not as the definition of test quality.
+  Do not add tests solely to increase a coverage percentage without asserting meaningful behavior.
+
+- When fixing a bug, add a regression test that demonstrates the previous failure
+  and passes because of the fix when practical.
+
+## Test portfolio and levels
+
+- Maintain a test portfolio appropriate to the system's risks and architecture.
+  Do not add a test category merely to satisfy a testing taxonomy;
+  introduce it when it protects a real behavior, boundary, failure mode, or operational requirement.
+
+- Use unit tests for focused behavior that can be proven without real external infrastructure.
+  Keep them fast and deterministic, but do not mock internal collaborators merely to make a test "unit".
+
+- Use integration tests when correctness depends on the real behavior of a framework,
+  database, cache, filesystem, serialization layer, broker, or other infrastructure boundary.
+  Do not replace those semantics entirely with mocks.
+
+- Use contract tests for important boundaries whose compatibility can break independently,
+  especially external APIs, service-to-service interfaces, message schemas, and provider adapters.
+
+- Keep end-to-end tests focused on a small set of critical system journeys.
+  Test detailed edge cases at lower levels when those levels can prove them more reliably.
+
+- Use smoke tests when an assembled or deployed system needs a fast check
+  that its essential capabilities are operational.
+
+- Treat regression as a testing purpose rather than a separate level.
+  Reproduce a bug at the lowest reliable level that demonstrates the previous failure.
+
+- Consider property-based testing when correctness is better expressed as an invariant
+  over a large input space than as a small collection of manually selected examples.
+
+- Use benchmarks when performance is itself a requirement or a meaningful regression risk.
+  Measure representative workloads rather than optimizing from intuition.
+
+- Use load tests when throughput, latency, concurrency, or resource behavior under expected traffic
+  is an operational requirement.
+  Define the workload and acceptance criteria explicitly.
+
+- Use stress tests when behavior beyond expected capacity matters.
+  Evaluate degradation, saturation, failure modes, and recovery.
+
+- Use soak or endurance tests when long-running resource leaks, backlog growth,
+  degradation, or stability are material risks.
+
+- Add focused concurrency tests for invariants that can fail under overlapping execution,
+  such as idempotency, locking, uniqueness, reservations, or concurrent state transitions.
+  Coordinate concurrency explicitly rather than relying on timing accidents.
+
+- Keep test categories independently selectable when they have materially different runtime,
+  infrastructure, environment, or CI requirements.
+
+- Match execution frequency to test cost and feedback value.
+  Keep fast correctness checks close to every change;
+  run expensive or long-duration suites in appropriate CI, deployment, or scheduled workflows.

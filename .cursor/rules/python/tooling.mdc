@@ -1,0 +1,40 @@
+---
+description: "Python tooling rules for uv dependency management, pyproject.toml, uv.lock, Ruff linting/formatting/import sorting, Pyright, Pylance, environments, and tool configuration. Apply when dependencies, Python environments, tooling commands, lint/type configuration, or project configuration are involved."
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Python tooling
+
+## uv
+
+- Treat `pyproject.toml` and `uv.lock` as the project dependency sources of truth.
+- Use `uv add` and `uv remove` to change dependencies. Do not use `pip` directly for project dependency
+  management and do not hand-edit `uv.lock`.
+- Add development-only tools with `uv add --dev <package>` unless the project deliberately uses another
+  dependency group.
+- The `dev` dependency group is included by default by normal `uv sync` and `uv run` workflows.
+  Do not add `--dev` to ordinary local commands merely to make development dependencies available.
+- Run project tools through `uv run` unless the repository provides a canonical wrapper such as `make`,
+  `just`, `tox`, `nox`, or a project script.
+- Respect the Python version declared by the project. Do not silently upgrade or downgrade it.
+
+## Ruff
+
+- Ruff is the canonical Python formatter, linter, and import sorter for this project.
+  Do not introduce Black, isort, Flake8, or overlapping style tools unless explicitly requested.
+- Let the Ruff configuration decide formatting, line length, import ordering, enabled lint rules,
+  and per-file exceptions.
+- Remember that import sorting is a linter fix, not part of `ruff format`.
+- Do not add lint suppressions just to make a check pass. Fix the code when practical.
+
+## Pyright and Pylance
+
+- Pyright is the reproducible project type checker. Pylance is the editor language server powered by Pyright.
+- Keep shared type-checking policy in project configuration, preferably `[tool.pyright]` in `pyproject.toml`,
+  rather than relying on developer-specific editor settings.
+- Do not treat Pylance-only editor diagnostics as a substitute for a repeatable Pyright CLI check when the
+  project expects type checking in CI or review.
+- Do not weaken type-checking configuration to accommodate one local error unless the change is an explicit
+  project decision.

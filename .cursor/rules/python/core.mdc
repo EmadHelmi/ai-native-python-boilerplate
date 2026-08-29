@@ -1,0 +1,63 @@
+---
+globs: "**/*.py,**/*.pyi"
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Python core
+
+## Change discipline
+
+- Inspect the nearest relevant implementation, tests, and project configuration before editing.
+  Follow established local patterns unless an applicable project rule explicitly requires otherwise.
+- Make the smallest coherent change that satisfies the task.
+  Do not refactor, rename, or clean up unrelated code.
+- Preserve public behavior and compatibility unless the task explicitly requires a behavior change.
+- Treat project configuration and tool output as the source of truth for formatting, linting, and typing.
+  Do not hand-format code in a way that fights configured tools.
+- Do not add broad suppressions such as file-wide `noqa`, `type: ignore`, or checker disables.
+  When a suppression is unavoidable, scope it to the smallest location and document the concrete reason.
+
+## Readability and design
+
+- Prefer straightforward code over cleverness or speculative abstraction.
+- Keep responsibilities cohesive. Extract helpers when they make a meaningful unit easier to understand,
+  test, or reuse; do not apply arbitrary function-length or caller-count thresholds.
+- Avoid mutable default arguments.
+- Use keyword-only parameters when they improve API clarity or prevent ambiguous calls.
+- Prefer explicit control flow when a comprehension, conditional expression, or lambda would obscure intent.
+- Use context managers or `try`/`finally` for deterministic resource cleanup.
+
+## Errors and runtime behavior
+
+- Raise the most specific appropriate built-in or project exception.
+- Keep `try` blocks limited to operations that can raise the exceptions being handled.
+- Do not catch `Exception` merely to hide failures. Broad catches are acceptable only at intentional
+  isolation boundaries where the failure is handled, translated, logged, or re-raised deliberately.
+- Do not use `assert` for user input validation, authorization, or runtime guarantees that must remain
+  active in optimized Python execution.
+
+## Type annotations
+
+- Follow the project's minimum supported Python version and configured type checker.
+- Prefer modern type syntax supported by that minimum version, including built-in generics and `X | None`
+  when available.
+- Annotate public boundaries and code whose types are not obvious from local context.
+- Prefer precise types over `Any`; use `Any` intentionally at genuinely dynamic or untyped boundaries.
+- Avoid adding type-checker workarounds when the underlying design or import dependency can be fixed cleanly.
+
+## Documentation
+
+- Update nearby documentation when behavior or a public contract changes.
+- Add docstrings where they explain a non-obvious public contract or important private invariant.
+  Do not add boilerplate docstrings that merely repeat the signature.
+- Comments should explain intent, constraints, tradeoffs, or surprising behavior rather than restating code.
+
+## Validation
+
+- Prefer repository-provided validation commands when they exist.
+- Otherwise, before completing a Python change, run the narrowest relevant checks already configured for the project.
+  In this baseline, those checks typically include Ruff linting, Ruff formatting checks, Pyright, and affected tests.
+- Do not add or install a missing validation tool solely to satisfy this fallback guidance.
+- If a configured check cannot run, report that explicitly rather than claiming validation succeeded.

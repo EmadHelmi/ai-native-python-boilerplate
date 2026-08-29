@@ -1,0 +1,115 @@
+---
+globs: "**/migrations/*.py,**/migrations/**/*.py"
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Django migrations
+
+## Migration workflow
+
+- Treat migration files as production source code and durable schema history.
+  Review generated operations rather than accepting `makemigrations` output blindly.
+
+- Keep model state and required migrations consistent and version-controlled together.
+
+- Keep each migration focused on one coherent schema or data evolution.
+  Split operations when they have materially different deployment, locking,
+  rollback, or runtime characteristics.
+
+- Prefer separating substantial data migrations from schema migrations,
+  especially when their runtime or rollback characteristics differ.
+
+- Do not combine a potentially expensive data rewrite with unrelated schema operations.
+
+- Give manually created or operationally significant migrations names
+  that communicate the purpose of the change.
+
+## Historical and data migrations
+
+- Use historical models from the migration app registry in `RunPython`.
+  Do not import current application models into historical migrations.
+
+- Do not assume historical models provide current custom methods, constructors,
+  model behavior, or custom `save()` implementations.
+
+- Keep migration logic self-contained and historically stable.
+  Do not depend on mutable application services or domain workflows whose future evolution
+  could make the migration impossible to replay.
+
+- In multi-database migrations, use `schema_editor.connection.alias`
+  and route ORM operations deliberately.
+
+- Make custom migrations reversible when a safe and semantically correct reverse operation exists.
+  Do not invent a misleading reverse path merely to make a migration technically reversible.
+
+- Treat intentionally irreversible or destructive migrations as explicit deployment decisions.
+
+- Distinguish reversibility from restartability.
+  Long-running forward migrations should remain safe when partially completed work must be retried.
+
+## Large data migrations
+
+- Design large data migrations around bounded batches rather than processing
+  the entire table in one transaction.
+
+- Consider a non-atomic migration with deliberately atomic batches
+  when a full-table transaction would create unacceptable locking, rollback cost,
+  transaction-log growth, or runtime.
+
+- Keep long-running backfills restartable or safely repeatable when interruption is realistic.
+
+- Account for concurrent application writes during backfills.
+  Do not overwrite values created or updated by live application code accidentally.
+
+## Production-safe schema evolution
+
+- For large or continuously written tables, prefer staged schema evolution
+  when adding required or uniquely constrained data:
+  introduce a compatible schema, backfill, enforce the constraint,
+  and remove transitional compatibility only after the data is ready.
+
+- When old and new application versions may run concurrently,
+  keep schema changes compatible across the deployment overlap window.
+
+- Avoid destructive drops, incompatible renames, or newly required assumptions
+  in the same deployment that first introduces code depending on the new schema
+  when rolling compatibility matters.
+
+- Do not assume a Django field default is necessarily a permanent database-side default.
+  Distinguish temporary migration population behavior from ongoing application defaults.
+
+- Consider locking and rewrite behavior for schema operations on large production tables.
+  Use backend-supported online or concurrent operations when availability requirements justify them.
+
+## Advanced operations
+
+- Prefer declarative Django migration operations when they represent the intended schema correctly.
+
+- Use `RunSQL` for database behavior Django cannot express cleanly,
+  not merely as a shortcut around the migration framework.
+
+- When raw SQL changes Django-managed schema,
+  keep database state and migration state synchronized.
+
+- Use `SeparateDatabaseAndState` only when database and Django state
+  intentionally require different operations.
+  Keep both representations demonstrably consistent.
+
+- Do not manipulate migration state merely to silence the migration autodetector.
+
+- Treat migration atomicity, DDL rollback, locking, and online-schema behavior
+  as database-backend concerns.
+  Do not assume the same migration strategy is safe across all supported databases.
+
+## Migration history
+
+- Keep migration dependencies as narrow as the operation requires.
+  Add cross-app dependencies only when historical state from another app is genuinely required.
+
+- Do not casually edit, reorder, replace, or delete migrations that may already have been deployed.
+
+- Squash migration history only through a deliberate maintenance process.
+  Keep replaced migrations until all relevant deployed environments
+  have safely advanced beyond the history they require.

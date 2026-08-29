@@ -1,0 +1,81 @@
+# Python bytecode and native extensions
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Build and packaging output
+.Python
+build/
+dist/
+downloads/
+.eggs/
+*.egg-info/
+*.egg
+wheels/
+MANIFEST
+
+# Test, coverage, and tool caches
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.hypothesis/
+.mypy_cache/
+.nox/
+.pytest_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+.tox/
+*.cover
+*.py,cover
+
+# Virtual environments and local environment configuration
+.direnv/
+.env
+.env.*
+!.env.example
+.venv/
+env/
+venv/
+__pypackages__/
+
+# Django runtime data
+*.log
+*.pot
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Documentation and notebook output
+docs/_build/
+site/
+.ipynb_checkpoints/
+
+# IDE-local state; selected VS Code project settings remain shareable
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/*.code-snippets
+.history/
+*.vsix
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
+
+# Local project material and optional personal conventions
+.local/
+.cursor/**/*convention*.mdc
+
+# Optional local Node.js tooling used for Markdown checks
+node_modules/
+
+# Locally generated repository archives
+/*.zip

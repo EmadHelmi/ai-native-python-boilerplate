@@ -1,0 +1,95 @@
+---
+globs: "**/*.py"
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Django transaction rules
+
+## Transaction boundaries
+
+- Use `transaction.atomic()` around the smallest set of database operations
+  that must succeed or fail together to preserve a consistency invariant.
+
+- Do not introduce a transaction merely because a function performs several ORM operations;
+  require one when those operations genuinely share an atomicity requirement.
+
+- Keep transactions as short as correctness permits.
+  Perform unrelated computation, serialization, logging, metrics, and slow external I/O
+  outside the transaction whenever possible.
+
+- Prefer `transaction.atomic()` over manual autocommit, commit, rollback,
+  or low-level transaction management.
+
+- Treat `atomic(using=...)` as a transaction boundary for one database connection.
+  Do not assume it provides atomicity across multiple databases or external resources.
+
+## Failure and rollback
+
+- Do not catch and suppress `DatabaseError` or `IntegrityError` inside the `atomic()` block
+  whose database work failed.
+  Catch database failures around the relevant atomic boundary so rollback occurs
+  before further database work is attempted.
+
+- Remember that a database rollback does not restore in-memory model state,
+  caches, globals, or other application state.
+
+- Do not treat `atomic()` alone as a concurrency guarantee.
+  Protect concurrency-sensitive invariants with the appropriate database mechanism.
+
+## Nested transactions
+
+- Nested `atomic()` blocks are valid when an inner savepoint defines
+  a deliberate rollback boundary.
+  Do not add nesting merely for visual grouping or defensive habit.
+
+- Keep nested savepoints enabled by default.
+  Disable them only when their overhead is material and the changed rollback semantics are understood.
+
+- Use `atomic(durable=True)` only when the code specifically requires
+  an outermost transaction boundary whose successful exit must commit.
+
+## Post-commit side effects
+
+- Use `transaction.on_commit()` for side effects that must occur only after
+  the database transaction commits successfully.
+
+- Use `on_commit()` for post-commit ordering, not as a durable-delivery guarantee.
+  Use a durable coordination mechanism such as an outbox when losing the follow-up action is unacceptable.
+
+- Do not assume an `on_commit()` callback participates in the committed transaction;
+  callback failure cannot roll back already committed database state.
+
+- When multiple post-commit callbacks are independent,
+  decide deliberately whether failure of one should prevent later callbacks from running.
+
+## Request transactions
+
+- Do not enable `ATOMIC_REQUESTS` merely for convenience.
+  Use it only when broad per-request transactions fit the application's consistency model
+  and their locking and performance cost is acceptable.
+
+- When `ATOMIC_REQUESTS` is enabled, remember that middleware and response rendering
+  are outside the view transaction and streaming response generation happens after it.
+
+- Avoid database writes while generating streaming responses.
+
+## Row locking
+
+- Use `select_for_update()` only inside an effective transaction
+  when a concurrency invariant genuinely requires pessimistic locking.
+
+- Lock only the rows and relationships required by the invariant,
+  and keep the locked transaction short.
+
+- Treat advanced locking options as database-specific capabilities;
+  verify their support and semantics on the project's database backend.
+
+## Async boundaries
+
+- In Django versions where transactions are not async-capable,
+  keep transaction-dependent ORM work in one synchronous function
+  and cross the sync/async boundary deliberately.
+
+- Do not disable Django's async-safety protections as a workaround for transaction-dependent code.

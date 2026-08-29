@@ -1,0 +1,96 @@
+---
+description: "Construction and Strategy/Policy design rules. Apply when creating or refactoring factories, named constructors, object reconstitution, identity/time generation, strategies, policies, registries, factories for implementation selection, or discriminator-driven behavior."
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Construction and policy patterns
+
+## Factories and object construction
+
+- Prefer direct construction when creating an object only requires supplying valid state.
+  Do not introduce a factory merely to wrap a constructor.
+
+- Use a named constructor when creation represents a meaningful domain transition,
+  selects a valid initial state, or deserves a domain-specific name.
+  Do not add generic `create()` or `build()` methods that merely forward to `__init__`.
+
+- Prefer construction paths that produce a valid object atomically.
+  Do not require callers to create incomplete domain objects and populate mandatory state through setters.
+
+- Prefer a factory function when construction is stateless and does not require
+  polymorphism, lifecycle, or injected dependencies.
+
+- Introduce a factory object only when construction has meaningful policy,
+  requires collaborators, selects implementations, or coordinates multiple construction steps.
+
+- Keep factories focused on construction.
+  Persistence, transactions, messaging, cross-aggregate coordination, and application workflow belong elsewhere.
+
+- Prefer passing already-loaded domain state into a factory rather than letting it orchestrate repositories.
+
+- Keep identity generation consistent with the domain and persistence model;
+  do not move database-owned identity generation into the domain merely for architectural purity.
+
+- Avoid hiding important nondeterministic dependencies such as time, randomness, or identity generation
+  inside domain construction when callers or tests need control over them.
+
+- Distinguish creation of a new domain object from reconstitution of persisted state.
+  Repositories must not invoke creation behavior that regenerates identity, resets lifecycle state,
+  or emits creation events while loading an existing object.
+
+- Keep reconstitution APIs domain-neutral;
+  do not introduce persistence terminology into domain types solely to support mapping.
+
+- Use a factory or registry when construction depends on a code-owned discriminator
+  and centralized selection removes repeated branching from callers.
+
+## Strategy and policy patterns
+
+- Introduce Strategy only when behavior genuinely varies behind a stable contract
+  and callers benefit from being independent of concrete implementations.
+  Prefer straightforward branching when variation is small, local, and unlikely to grow.
+
+- Name strategies after the capability or policy that varies.
+  When they represent business behavior, use ubiquitous domain language rather than generic `Strategy` names.
+
+- Keep strategy contracts narrow and cohesive.
+  Split independent variation points rather than combining unrelated behavior in one strategy interface.
+
+- Keep strategies stateless by default.
+  Store state only when it is explicitly part of their behavior or lifecycle.
+
+- Keep implementation selection outside concrete strategies.
+  A strategy should implement one behavior, not decide which strategy should have been selected.
+
+- Centralize strategy selection in one registry, factory, or composition point.
+  Do not repeat discriminator-to-implementation branching across callers.
+
+- Prefer a simple registry for static, code-owned mappings.
+  Use a factory when selection also requires construction logic, dependencies, or configuration.
+
+- Select code strategies from code-owned domain or configuration values.
+  Do not query persistence merely to discover which Python implementation should run
+  unless runtime-pluggable behavior is an explicit requirement.
+
+- Prefer configuration to parameterize behavior rather than naming concrete implementation classes.
+
+- Keep domain strategies independent of ORM, HTTP, framework, and transport concerns.
+  Pass required domain state explicitly or depend on an inward-owned port when necessary.
+
+- Distinguish domain-policy strategies from infrastructure adapters.
+  Domain strategies encode business variation;
+  infrastructure strategies implement technical capabilities behind an inner-layer port.
+
+- Do not replace clear domain conditionals with polymorphism solely to eliminate `if` statements.
+  Use Strategy when the variation itself is a stable concept.
+
+- Prefer structural contracts for strategies.
+  Add a shared base class only when concrete strategies genuinely share implementation or lifecycle behavior.
+
+- Use a default strategy only when fallback behavior is an explicit part of the contract.
+  Unknown discriminators should otherwise fail explicitly.
+
+- When a finite discriminator requires complete strategy coverage,
+  validate or test registry completeness so new values cannot silently bypass implementation.

@@ -1,0 +1,129 @@
+---
+description: Optional per-file authorship convention for projects that explicitly adopt it.
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Optional file authorship
+
+This rule is an opt-in reusable profile. It does not apply to public
+contributions or derived projects unless the repository explicitly adopts it.
+
+Git history and the repository license are the default sources for authorship,
+provenance, and reuse rights. Do not add per-file names or email addresses by
+default.
+
+## Requirement after explicit adoption
+
+- Every new human-maintained repository file MUST include author information
+  only after this convention has been explicitly adopted.
+- Apply this requirement when creating a new file, including a new file
+  produced by splitting or extracting content from an existing file.
+- Do not treat a simple rename or move of an existing file as new authorship.
+- Do not retroactively add authorship metadata to unrelated existing files as
+  part of an unrelated change.
+
+## Author identity
+
+- When editing an existing file, preserve its author information unless the
+  current change explicitly requires that metadata to be corrected or updated.
+- For a newly created file, use the effective Git identity for the repository
+  when both values are configured:
+  - `git config --get user.name`
+  - `git config --get user.email`
+- If either value is unavailable, surface the limitation rather than silently
+  using an unrelated identity.
+- If the repository convention also includes a handle and the applicable
+  handle is established by existing repository metadata, include it consistently.
+- Never invent a name, email address, username, or handle.
+- Do not identify an AI agent as the author or co-author unless the repository
+  explicitly requires that attribution.
+
+## Representation
+
+Use the file format's normal, valid mechanism for authorship.
+
+Prefer this order:
+
+1. a standard or schema-defined author field when the format explicitly
+   supports one;
+2. otherwise, a valid comment using the file format's established comment
+   syntax;
+3. if neither is valid, use an established adjacent metadata mechanism when
+   the repository or format provides one.
+
+Examples:
+
+```text
+Python / Shell / YAML / TOML / Dockerfile
+# Author: Name <email> (@handle)
+
+JavaScript / TypeScript / Go / Java / C-like source
+// Author: Name <email> (@handle)
+
+SQL
+-- Author: Name <email> (@handle)
+
+HTML / XML / Markdown
+<!-- Author: Name <email> (@handle) -->
+```
+
+When a format has a standard non-comment author field, use that field instead
+of adding a redundant comment.
+
+## Placement
+
+- Place authorship metadata near the beginning of the file where it is easy
+  for a human reader to discover.
+- Preserve format-required leading content.
+- A shebang MUST remain the first line when required.
+- An encoding declaration, XML declaration, document frontmatter, or other
+  syntax with a required position MUST remain valid.
+- When required leading metadata exists, place the author information at the
+  earliest valid location after or within that metadata according to the
+  format's conventions.
+- Follow an established repository placement pattern when one exists.
+
+## Validity and schema safety
+
+- Authorship metadata MUST NOT make a file syntactically invalid or violate
+  the file's schema.
+- Do not add comments to formats that do not allow comments.
+- Do not invent an `author` key in JSON, manifests, configuration files, or
+  structured payloads unless the governing schema explicitly permits it.
+- Do not add unsupported metadata merely to satisfy this rule mechanically.
+- When in-file authorship is impossible without violating a required format or
+  schema, preserve file validity and use an established standard metadata
+  mechanism if one exists.
+- If no valid authorship mechanism exists, surface the limitation rather than
+  corrupting the file.
+
+## Generated and externally managed files
+
+Do not manually inject authorship metadata into files whose contents are
+controlled by another tool or external source when doing so would be unstable,
+overwritten, invalid, or misleading.
+
+This includes, when applicable:
+
+- lock files;
+- generated artifacts;
+- vendored or third-party files;
+- compiled or binary files;
+- caches;
+- files copied verbatim from an external authoritative source;
+- machine-generated files whose generator owns the complete file content.
+
+If a generator provides a supported template or metadata mechanism for
+authorship, configure that mechanism instead of post-editing generated output.
+
+## Existing conventions
+
+- Preserve a more specific repository or format convention when one exists.
+- Do not create multiple competing author headers in the same file.
+- When a new file is based substantially on an existing repository file,
+  preserve legally or historically relevant authorship and attribution rather
+  than replacing it blindly.
+- Authorship metadata does not replace Git history, copyright notices, license
+  headers, or legally required attribution.

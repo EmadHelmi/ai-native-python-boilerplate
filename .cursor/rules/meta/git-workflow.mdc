@@ -1,0 +1,27 @@
+---
+alwaysApply: true
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Branch creation
+
+- Create new branches from the repository's primary integration branch
+  (for example `main`) by default.
+
+- Do not create a new branch from the current working branch
+  unless the new work explicitly depends on changes that are not yet merged.
+
+- When a branch must depend on another unmerged branch:
+  - make the dependency explicit,
+  - keep the dependency temporary,
+  - once the prerequisite branch is merged, either rebase the dependent branch
+    onto the integration branch or merge the updated integration branch into the dependent branch.
+
+- Avoid long-lived branch chains where one feature branch permanently depends on another feature branch.
+
+- Before creating a branch, identify the correct source branch and explain the dependency
+  if it is not the primary integration branch.
+
+- Never silently choose a non-default source branch for a new branch.
+  State the source branch and reason before creating it.

@@ -1,0 +1,126 @@
+---
+description: "Domain/integration event and distributed-workflow rules. Apply when creating or changing domain events, integration events, handlers, brokers, queues, outbox, side effects, transactions, retries, compensation, sagas/process managers, choreography/orchestration, or eventual consistency."
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Events and consistency workflows
+
+## Domain and integration events
+
+- Emit a domain event only for a business-significant fact that has already occurred.
+  Name events as facts, preferably in past tense; do not use events as commands.
+
+- Record an event at the point where the domain transition that makes it true succeeds.
+  Do not reconstruct domain events later from mutated state when the domain object owns that decision.
+
+- Domain objects may record events but must not publish them through brokers,
+  task queues, framework signals, or infrastructure event buses directly.
+
+- Make domain events immutable and keep their payload explicit and minimal.
+  Include stable identities and event-time business facts required by consumers;
+  do not attach mutable aggregates, ORM models, requests, or infrastructure objects.
+
+- Include event-time values when consumers need the fact as it existed when the event occurred;
+  do not force consumers to reload mutable state when doing so could change the event's meaning.
+
+- Distinguish domain events from integration events.
+  Domain events are internal domain facts; integration events are explicit,
+  versioned contracts crossing process or service boundaries.
+  Translate between them at the application or infrastructure boundary.
+
+- Do not assume domain events require asynchronous messaging.
+  Choose synchronous or asynchronous handling from consistency, latency, failure, and coupling requirements.
+
+- A domain event must describe a transition that is already valid.
+  Do not rely on handlers to complete the invariant that justified emitting the event.
+
+- Treat event handlers as application entry points.
+  They may coordinate new use cases or aggregates but should not bypass domain behavior.
+
+- Never expose an event externally as committed fact before the transaction establishing it succeeds.
+
+- Use a transactional outbox when external event delivery must be durably consistent with a database commit.
+  Do not introduce an outbox when its delivery guarantees do not justify the complexity.
+
+- Design integration-event consumers for retries and duplicate delivery.
+  Make externally triggered side effects idempotent where practical.
+
+- Add event identity, occurrence time, correlation, causation, or similar metadata
+  only when required by delivery, observability, ordering, or idempotency concerns.
+
+- Do not rely on global event ordering unless the messaging architecture explicitly guarantees it.
+  Scope ordering requirements deliberately around the relevant stream or aggregate identity.
+
+- Define handler failure semantics deliberately;
+  transaction, retry, and delivery behavior must not emerge accidentally from handler failures.
+
+- Do not replace straightforward synchronous application flow with events merely to reduce direct dependencies.
+  Use events when independent reactions, temporal decoupling, eventual consistency, or extensibility provide concrete value.
+
+## Transactions, side effects, and consistency
+
+- Define business transaction boundaries in the application use case or an explicit unit-of-work boundary.
+  Domain objects must not know about transactions, and repositories must not secretly own multi-step business transactions.
+
+- Keep transactions as small as correctness permits.
+  Perform unrelated computation, serialization, logging, and external I/O outside the transaction.
+
+- Do not perform irreversible or slow external side effects while holding a database transaction by default.
+
+- Trigger side effects that require committed state only after the local transaction succeeds.
+  Never expose a state transition externally while the establishing transaction can still roll back.
+
+- Distinguish post-commit ordering from durable delivery.
+  An after-commit callback prevents premature side effects but does not guarantee delivery after a process crash.
+
+- Treat a database transaction as atomic only for resources it actually controls.
+  Do not assume its semantics extend to brokers, caches, external APIs, or other datastores.
+
+- Do not introduce distributed transactions merely to simulate one global atomic operation.
+  Prefer local transactions with explicit coordination, idempotency, durable
+  messaging, or compensation when the business permits it.
+
+- When a workflow spans independent consistency boundaries, make eventual consistency explicit.
+  Model intermediate states, retries, and recovery rather than pretending the workflow is atomic.
+
+- Treat compensation as a new business action, not as a distributed rollback.
+  Design compensating behavior explicitly for completed external effects that must be semantically undone.
+
+- Do not assume every side effect is reversible.
+  Identify irreversible actions and design workflow ordering and failure semantics accordingly.
+
+- Introduce a saga or process manager when a long-running workflow coordinates multiple independent transactions,
+  owns meaningful intermediate state, and requires explicit retries, compensation, or recovery.
+  Do not introduce one for workflows that remain clearer as ordinary synchronous orchestration.
+
+- Keep workflow coordination state separate from core domain entities
+  unless the workflow itself is a genuine domain concept.
+
+- Prefer explicit orchestration when a workflow has important ordering, recovery, or compensation semantics.
+  Use choreography when reactions are genuinely independent and no central component owns the workflow.
+
+- Do not use event choreography merely to hide direct workflow dependencies.
+
+- Distinguish local mutation, internal events, integration events, and commands sent to external systems;
+  each has different consistency and failure semantics.
+
+- Do not base correctness on assumed exactly-once delivery.
+  Design external operations and consumers to tolerate retries and duplicate delivery.
+
+- Assign retry ownership deliberately.
+  Avoid stacked retry loops across layers unless their interaction is understood.
+
+- Keep retries bounded and observable, with deliberate backoff and terminal-failure behavior.
+  Retry transient failures rather than deterministic business outcomes.
+
+- Preserve recorded domain events until the transaction outcome is known.
+  Do not clear or expose them in a way that can lose events on rollback or commit failure.
+
+- Decide explicitly whether synchronous event handlers participate in the originating transaction.
+  Handlers required for the same local invariant may run inside it;
+  independent side effects should normally occur after commit.
+
+- Use a Unit of Work when it materially clarifies transaction ownership and repository coordination;
+  do not add one when the framework's transaction boundary is already sufficient.

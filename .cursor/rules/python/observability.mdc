@@ -1,0 +1,192 @@
+---
+description: "Python observability rules. Apply when adding or changing logging, log levels, exception logging, structured context, metrics, metric labels, operational diagnostics, or instrumentation."
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Python observability
+
+## Logging
+
+- Use the project's logging abstraction when one exists;
+  otherwise use a module logger created with `logging.getLogger(__name__)`.
+
+- Choose log levels by operational meaning:
+  use `debug` for diagnostic detail, `info` for meaningful normal operation,
+  `warning` for abnormal conditions the system can continue through,
+  and `error` or `exception` for failed operations that require investigation.
+  Reserve `critical` for failures that threaten continued service or a major subsystem.
+
+- Do not log expected business outcomes as system failures merely because they are represented by exceptions.
+  Choose severity from operational significance, not from whether control flow used an exception.
+
+- Include a traceback when it materially helps diagnose an unexpected failure.
+  Do not attach tracebacks to routine or expected outcomes merely because they were implemented with exceptions.
+
+- Log a failure at the boundary that has enough context to make it actionable.
+  Do not log and re-log the same propagated exception at multiple architectural layers.
+
+- Log meaningful operational events, state transitions, boundary failures, and diagnostic information.
+  Do not add logs merely to narrate ordinary control flow or every function entry and exit.
+
+- Never log secrets, credentials, private keys, access tokens, authentication material,
+  or sensitive data that is not required for the operational purpose of the log.
+
+- Prefer structured, queryable context supported by the project logger, adapter, or `extra` fields.
+  Attach relevant stable identifiers and dimensions as fields rather than embedding large objects
+  or machine-relevant data only inside free-form message text.
+
+- Keep log event messages stable enough to group and search operationally.
+  Put variable identifiers and dimensions in structured fields when the logging stack supports them.
+
+- Preserve request, trace, correlation, or message context across asynchronous and service boundaries
+  when the project's observability stack provides such context.
+  Do not invent parallel correlation mechanisms without a concrete need.
+
+## Metrics
+
+- Use the project's existing metrics abstraction, semantic conventions, and naming scheme.
+  Do not introduce a parallel instrumentation style without a concrete need.
+
+- Choose the metric instrument from the semantics of the value:
+  use monotonic counters for cumulative values that do not decrease;
+  use a gauge or an up/down-style instrument supported by the telemetry backend for values that can increase or decrease;
+  and use histograms or other distribution instruments for observed distributions such as latency or size.
+
+- Measure latency, size, and other meaningful distributions with a distribution instrument
+  rather than recording only an average or the most recent value.
+
+- Choose histogram buckets or resolution from the expected value range and operational thresholds.
+  Do not copy default buckets blindly when they poorly represent the workload.
+
+- Prefer aggregatable distribution metrics when observations must be combined across workers or instances.
+  Use client-side summaries or quantile instruments only when their aggregation limitations are understood.
+
+- Keep metric dimensions bounded and operationally meaningful.
+  Never use user IDs, order IDs, request IDs, timestamps, raw URLs, arbitrary strings,
+  or other unbounded values as metric labels or attributes.
+
+- Normalize variable dimensions before using them as metric attributes.
+  Prefer bounded values such as route templates, operation names, status classes,
+  or controlled enums over raw externally supplied values.
+
+- Do not use exception messages, free-form error text, stack traces,
+  or other uncontrolled strings as metric dimensions.
+  Use bounded failure categories when a failure dimension is operationally useful.
+
+- Keep metric names stable.
+  Represent bounded variations as labels or attributes rather than generating metric names dynamically.
+
+- Keep each metric focused on one logical quantity with consistent semantics and units across all dimensions.
+  Split measurements whose values cannot be meaningfully aggregated together.
+
+- Use consistent base units and follow the naming conventions of the project's metrics backend.
+  For Prometheus-native metrics, follow Prometheus unit and counter suffix conventions;
+  for OpenTelemetry instrumentation, follow its metric and semantic conventions.
+
+- Instrument important operations so their volume and meaningful outcomes can be derived,
+  especially at service, application, queue, datastore, and external-system boundaries.
+
+- Instrument meaningful business outcomes when they help explain system health or behavior.
+
+- Measure meaningful boundaries and outcomes rather than every internal function or implementation detail.
+
+- Keep recurring metric dimensions and values semantically consistent across the codebase.
+  Reuse established attribute names and bounded vocabularies.
+
+- Keep instrumentation observational.
+  Metric collection must not determine business outcomes, mutate domain state,
+  or hide the original application failure.
+
+- Do not make ordinary application success depend on telemetry export succeeding
+  unless telemetry delivery is itself an explicit business requirement.
+
+- Keep instrumentation cost proportional to its operational value.
+  Avoid expensive metric computation or excessive instrumentation on hot paths.
+
+## Tracing and correlation
+
+- Use the project's existing tracing abstraction and instrumentation stack.
+  Prefer well-supported framework and library instrumentation over duplicating spans
+  or context propagation manually.
+
+- Add manual spans for meaningful application, workflow, or external-operation boundaries
+  not already represented by automatic instrumentation.
+  Do not trace every helper or function merely to increase span count.
+
+- Keep span names stable and low-cardinality.
+  Name the operation rather than a specific request, entity, identifier, URL instance, or payload value.
+
+- Put useful operation context in span attributes rather than encoding variable values into span names.
+  Avoid attaching large objects, payloads, or unnecessary identifiers.
+
+- Reuse established telemetry semantic conventions for common protocols and concepts.
+  Introduce custom attributes only when no appropriate standard semantic field exists.
+
+- Preserve tracing context across process, service, asynchronous-task, and messaging boundaries.
+  Use the propagation mechanism provided by the project's instrumentation stack.
+
+- Propagate tracing context manually only when automatic or library-level propagation
+  cannot represent the boundary correctly.
+
+- Correlate logs with traces through native observability-context integration when available.
+  Do not manually thread trace or span identifiers through application APIs solely for logging.
+
+- Reuse existing request, correlation, and trace identities consistently.
+  Do not create parallel identifiers unless they have distinct operational or contractual semantics.
+
+- Keep propagated baggage minimal and explicitly justified.
+  Never use baggage for credentials, secrets, sensitive personal data, large payloads,
+  or arbitrary application state.
+
+- Treat propagated context crossing untrusted boundaries according to the project's trust policy.
+  Do not blindly trust arbitrary incoming baggage or expose unnecessary internal tracing context externally.
+
+- Mark tracing errors from operation semantics, not merely from the presence of an exception.
+  Do not automatically classify expected business rejections as service failures.
+
+- Avoid recording the same failure redundantly on every nested span.
+  Record it at the boundary that best represents the failed operation
+  unless instrumentation already captures it appropriately.
+
+- Keep trace sampling and export policy outside business behavior.
+  Application correctness must not depend on whether telemetry is sampled or exported.
+
+- Keep tracing observational.
+  Instrumentation must not swallow exceptions, change transaction semantics,
+  alter return values, or otherwise change application behavior.
+
+## Telemetry integrations
+
+- Prefer the observability stack already adopted by the project.
+  Do not introduce a new telemetry vendor, SDK, exporter, or transport merely to instrument one feature.
+
+- Keep domain and core application behavior independent of vendor-specific telemetry SDKs.
+  Configure and adapt observability integrations at application, infrastructure, or bootstrap boundaries.
+
+- Prefer established semantic conventions and structured fields over vendor-specific naming
+  when doing so preserves interoperability with the project's observability pipeline.
+
+- Keep vendor-specific transport, schema, filtering, sampling, and SDK conventions
+  in integration-specific project rules rather than the reusable Python observability rules.
+
+- Do not emit the same telemetry independently to multiple backends
+  when the project's collector or observability pipeline can fan it out centrally.
+
+## Health signaling
+
+- Keep liveness, readiness, and startup semantics distinct.
+  A liveness failure should represent a condition where restarting the process is a meaningful recovery action;
+  temporary dependency unavailability should not normally make the process appear dead.
+
+- Keep health checks lightweight, deterministic, and free of side effects.
+  They must not perform expensive work merely to prove that the application is healthy.
+
+- Let application code expose the minimum health state required by the runtime,
+  while deployment configuration owns probe transport, cadence, timeouts, thresholds,
+  restart behavior, and rollout policy.
+
+- Include external dependencies in readiness only when their availability is genuinely required
+  for the instance to serve its intended workload.
+  Do not turn health checks into exhaustive diagnostics of every connected system.

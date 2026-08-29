@@ -1,0 +1,32 @@
+---
+alwaysApply: true
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Rule-set compliance
+
+- Follow all applicable project rules.
+  Never silently violate a rule that applies to the current change.
+
+- Apply rules according to their actual scope.
+  When applicable rules overlap, prefer the narrower and more specific rule
+  for the concern being addressed.
+
+- Treat an explicit repository- or project-specific rule as an intentional specialization
+  of a reusable generic rule when both govern the same concern.
+
+- Do not infer precedence from filenames, directory ordering, or numeric prefixes.
+
+- If applicable rules remain materially incompatible after considering their scope,
+  surface the conflict rather than silently choosing one.
+
+- Apply compliance checks proportionally to the change.
+  Do not perform a repository-wide rule audit for a local edit
+  unless the task or an explicit compliance workflow requires one.
+
+- When an applicable rule is version-sensitive,
+  follow the rule-set compatibility policy before assuming the guidance is current.
+
+- If the repository provides an explicit rule-compliance skill or exception-recording workflow,
+  use that mechanism when a rule violation must be intentionally accepted or deferred.

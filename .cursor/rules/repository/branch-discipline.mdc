@@ -1,0 +1,169 @@
+---
+description: Optional strict issue-numbered branch discipline for derived projects that explicitly adopt it.
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Branch discipline
+
+This rule is an opt-in reusable profile. It is not the public contribution
+policy of this repository. Apply it only when a derived project explicitly
+adopts strict issue-numbered branches.
+
+Keep Git branches focused, traceable, and limited to one coherent unit of
+work.
+
+## Branch scope
+
+- Every meaningful change MUST belong to an appropriately scoped branch.
+- A branch MUST represent one coherent issue, feature, bug fix, improvement,
+  documentation change, or other independently reviewable unit of work.
+- Do not accumulate unrelated work on a branch merely because that branch is
+  already checked out.
+- Do not treat a change as belonging to the current branch merely because it
+  exists in the working tree.
+- Before staging or committing a change, verify that it genuinely belongs to
+  the purpose and scope of the current branch.
+- If a discovered or requested change does not belong to the current branch,
+  keep it separate and handle it through an appropriate branch or separately
+  approved workflow.
+- Incidental cleanup, refactoring, formatting, documentation, or fixes that
+  are unrelated to the branch purpose MUST NOT be bundled into the branch
+  unless they are necessary for the intended change.
+- Preserve unrelated pre-existing working-tree changes. Do not stage, modify,
+  revert, or commit them as part of the current branch.
+
+## Commit scope
+
+- Commits on a branch MUST contain only changes relevant to that branch's
+  purpose.
+- Before committing, inspect the staged diff and exclude unrelated files or
+  hunks.
+- Prefer coherent commits that represent understandable steps within the
+  branch's overall purpose.
+- Do not use broad staging such as `git add .` or an equivalent command when
+  it could include unrelated changes without first verifying exactly what
+  will be staged.
+- A commit MUST NOT be used as a convenient container for unrelated
+  outstanding work.
+- If a file contains both branch-related and unrelated changes, stage only
+  the relevant hunks when this can be done safely.
+- Implementation approval does not imply approval to commit, create, rename,
+  delete, merge, rebase, or otherwise mutate branches. Follow the repository's
+  applicable Git authorization workflow.
+
+## Branch naming
+
+Use this format:
+
+```text
+<type>/<number>-<short-name>
+```
+
+The numeric component is mandatory. It MUST NOT be omitted, replaced by a
+non-numeric identifier, or treated as optional under any circumstance covered
+by this rule.
+
+The allowed branch types are:
+
+- `feat` - new functionality or behavior;
+- `bugfix` - an ordinary bug fix;
+- `hotfix` - an urgent production fix requiring expedited handling;
+- `imp` - an improvement to existing behavior or implementation;
+- `refactor` - a structural change without intended behavioral change;
+- `perf` - a performance improvement;
+- `test` - test-only work;
+- `docs` - documentation-only work;
+- `build` - dependency, packaging, or build-system work;
+- `ci` - CI/CD or pipeline work;
+- `chore` - maintenance work that does not fit a more specific type.
+
+### Numbering policy
+
+- When an issue or task number is available, the branch number MUST be that
+  issue or task number.
+- Do not replace a known issue/task number with a locally generated sequence
+  number.
+- If no issue/task number is available or has been provided, a fallback
+  incremental number MUST be allocated.
+- The fallback sequence is maintained independently for each branch type.
+- The first fallback candidate for a branch type is `1`.
+- Each later fallback candidate MUST be exactly one greater than the highest
+  fallback number previously allocated for that same branch type.
+- If a candidate is already used by any branch of the same type, including an
+  issue- or task-based branch, advance to the first higher unused number.
+- An available fallback candidate MUST NOT be skipped intentionally.
+- A fallback number MUST NEVER be reused for another branch of the same type,
+  even if the earlier branch was merged, renamed, closed, or deleted.
+- A fallback allocation MUST NOT reuse a numeric component already used by
+  another branch of the same type, regardless of how that number originated.
+- The same fallback numeric value MAY exist under different branch types
+  because each type has an independent fallback sequence.
+- Before allocating a fallback number, inspect the repository's relevant
+  branch history, remote/local refs, or other established branch registry to
+  determine both the fallback sequence and the numeric components already
+  used by that branch type.
+- Do not guess a fallback number when the existing sequence cannot be
+  established reliably.
+- If neither an issue/task number nor a reliable fallback number can be
+  determined, stop and surface the uncertainty rather than creating an
+  unnumbered or potentially duplicate branch.
+- The fallback number exists only to preserve mandatory branch numbering when
+  no issue/task number is available. It MUST NOT be presented as an issue/task
+  identifier.
+
+Branch names MUST:
+
+- use one of the allowed branch types;
+- include the mandatory numeric component;
+- use the related issue/task number when one is available;
+- use a fallback incremental number only when no issue/task number is
+  available;
+- use a short, descriptive, lowercase kebab-case name;
+- avoid spaces, underscores, uppercase characters, and unnecessary wording.
+
+Unless the repository defines a stricter naming policy, branch names SHOULD
+match:
+
+```regex
+^(feat|bugfix|hotfix|imp|refactor|perf|test|docs|build|ci|chore)/[1-9][0-9]*-[a-z0-9]+(?:-[a-z0-9]+)*$
+```
+
+Examples with issue/task numbers:
+
+```text
+feat/123-add-market-order
+bugfix/456-fix-fee-calculation
+hotfix/789-restore-withdrawals
+imp/321-improve-order-validation
+refactor/852-split-payment-service
+perf/741-reduce-order-query-count
+test/963-cover-settlement-flow
+docs/654-update-api-guide
+build/151-update-ruff
+ci/160-add-security-check
+chore/171-clean-dev-scripts
+```
+
+Fallback examples when no issue/task number is available:
+
+```text
+feat/1-add-market-order
+feat/2-add-stop-limit
+bugfix/1-fix-fee-calculation
+bugfix/2-fix-balance-rounding
+```
+
+## Existing repository policy
+
+- An explicit repository or organization Git or branch policy takes
+  precedence over this rule.
+- Public contributors to this boilerplate follow `CONTRIBUTING.md`; they are
+  not required to use this optional numbering scheme.
+- If the repository already defines allowed branch types, naming rules, issue
+  requirements, or branch-protection requirements, follow those instead of
+  introducing a competing convention.
+- A more specific compatible repository policy may narrow this rule.
+- If an applicable repository policy materially conflicts with this rule,
+  surface the conflict rather than silently overriding the repository.

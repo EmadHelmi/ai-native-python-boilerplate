@@ -1,0 +1,492 @@
+[project]
+name = "ai-native-python-project-boilerplate"
+version = "0.1.0"
+description = "A production-oriented Python project boilerplate with modern tooling and human-controlled AI-agent workflows."
+readme = "README.md"
+requires-python = ">=3.13"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Emad Helmi", email = "s.emad.helmi@gmail.com" }]
+dependencies = []
+
+[project.urls]
+Documentation = "https://github.com/EmadHelmi/ai-native-python-boilerplate/tree/main/docs"
+Issues = "https://github.com/EmadHelmi/ai-native-python-boilerplate/issues"
+Repository = "https://github.com/EmadHelmi/ai-native-python-boilerplate"
+
+[dependency-groups]
+dev = [
+    "import-linter>=2.13",
+    "pre-commit>=4.6.2",
+    "pyright>=1.1.411",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.3,<0.17",
+]
+
+[tool.ruff]
+required-version = ">=0.16,<0.17"
+line-length = 79
+indent-width = 4
+# Markdown is owned by markdownlint-cli2.
+extend-exclude = ["*.md", "*.mdc"]
+
+[tool.ruff.lint]
+preview = true
+explicit-preview-rules = true
+
+select = [
+    # ============================================================
+    # Core correctness
+    # ============================================================
+
+    # pycodestyle: imports, statements, syntax/runtime errors.
+    "E4",
+    "E7",
+    "E9",
+
+    # Pyflakes.
+    "F",
+
+    # Bugbear: high-value bug and correctness checks.
+    "B",
+
+    # Blind broad exception handling.
+    "BLE",
+
+    # Builtin shadowing.
+    "A",
+
+    # Import sorting / isort.
+    "I",
+
+    # Naming conventions.
+    "N",
+
+    # Modern Python syntax according to the project's Python version.
+    "UP",
+
+    # Ruff-native correctness and modernization rules.
+    "RUF",
+
+    # Pylint errors.
+    "PLE",
+
+    # Pylint conventions/warnings that are generally useful.
+    "PLC",
+    "PLW",
+
+    # Stub-file correctness.
+    "PYI",
+
+
+    # ============================================================
+    # Readability and simplification
+    # ============================================================
+
+    # flake8-return.
+    "RET",
+
+    # flake8-simplify.
+    "SIM",
+
+    # flake8-comprehensions.
+    "C4",
+
+    # flake8-pie.
+    "PIE",
+
+    # Cleaner raise statements.
+    "RSE",
+
+    # Modern pathlib-first filesystem code.
+    "PTH",
+
+    # f-string modernization where the transformation is clear.
+    "FLY",
+
+
+    # ============================================================
+    # Logging and observability
+    # ============================================================
+
+    # Correct logging API usage.
+    "LOG",
+
+    # Lazy logging formatting.
+    "G",
+
+
+    # ============================================================
+    # Imports and project hygiene
+    # ============================================================
+
+    # Absolute imports and configurable banned imports.
+    "TID",
+
+    # Convention:TODO: <issue-link> - <description>
+    "TD",
+
+    # gettext correctness.
+    "INT",
+
+    # Debugger statements.
+    "T10",
+
+    # Executable/shebang consistency.
+    "EXE",
+
+    # Blanket noqa / type-ignore and invalid mock access.
+    "PGH",
+
+    # Correct sys.version handling.
+    "YTT",
+
+
+    # ============================================================
+    # Explicit pycodestyle rules
+    # ============================================================
+
+    # Formatter uses 79 as its target, but this makes it enforceable.
+    "line-too-long",
+
+    # Catch invalid escape sequences.
+    "invalid-escape-sequence",
+
+    # Catch mixed tabs/spaces without enabling formatter-conflicting
+    # whitespace families.
+    "mixed-spaces-and-tabs",
+
+
+    # ============================================================
+    # String correctness
+    # ============================================================
+
+    # `"foo" "bar"` on one line is usually accidental.
+    "single-line-implicit-string-concatenation",
+
+    # Especially catches missing commas:
+    # ["foo" "bar"].
+    "implicit-string-concatenation-in-collection-literal",
+
+
+    # ============================================================
+    # Async correctness
+    # ============================================================
+
+    # Do not perform obviously blocking network/process operations
+    # inside async functions.
+    "blocking-http-call-in-async-function",
+    "blocking-http-call-httpx-in-async-function",
+    "create-subprocess-in-async-function",
+    "run-process-in-async-function",
+    "wait-for-process-in-async-function",
+    "blocking-input-in-async-function",
+    "blocking-sleep-in-async-function",
+
+
+    # ============================================================
+    # Datetime correctness
+    # ============================================================
+
+    # Datetimes should be timezone-aware.
+    # Date-only values and intentional parsing of naive strings remain valid.
+    "call-datetime-without-tzinfo",
+    "call-datetime-today",
+    "call-datetime-utcnow",
+    "call-datetime-utcfromtimestamp",
+    "call-datetime-now-without-tzinfo",
+    "call-datetime-fromtimestamp",
+    "datetime-min-max",
+
+
+    # ============================================================
+    # Security — selected high-confidence Bandit rules
+    # ============================================================
+
+    "exec-builtin",
+    "bad-file-permissions",
+    "hardcoded-temp-file",
+
+    "try-except-pass",
+    "try-except-continue",
+
+    "request-without-timeout",
+
+    "tarfile-unsafe-members",
+    "suspicious-mktemp-usage",
+    "suspicious-eval-usage",
+    "suspicious-unverified-context-usage",
+
+    "request-with-no-cert-validation",
+    "ssl-insecure-version",
+    "ssl-with-bad-defaults",
+    "ssl-with-no-version",
+    "weak-cryptographic-key",
+    "unsafe-yaml-load",
+    "ssh-no-host-key-verification",
+
+    "paramiko-call",
+    "subprocess-popen-with-shell-equals-true",
+    "call-with-shell-equals-true",
+    "start-process-with-a-shell",
+    "unix-command-wildcard-injection",
+
+    "hardcoded-sql-expression",
+    "django-extra",
+    "django-raw-sql",
+
+    "logging-config-insecure-listen",
+    "jinja2-autoescape-false",
+    "unsafe-markup-use",
+
+
+    # ============================================================
+    # Type-checking boundary correctness
+    # ============================================================
+
+    # Intentionally do NOT enable TC001-TC003:
+    # we don't want Ruff aggressively moving imports into TYPE_CHECKING.
+    "runtime-import-in-type-checking-block",
+    "empty-type-checking-block",
+    "runtime-cast-value",
+    "runtime-string-union",
+
+
+    # ============================================================
+    # Performance — only when also clearer
+    # ============================================================
+
+    "unnecessary-list-cast",
+    "incorrect-dict-iterator",
+    "manual-list-copy",
+
+
+    # ============================================================
+    # Selected Pylint refactors
+    # ============================================================
+
+    "comparison-with-itself",
+    "comparison-of-constant",
+    "property-with-parameters",
+    "redefined-argument-from-local",
+    "stop-iteration-return",
+
+    "repeated-equality-comparison",
+    "boolean-chained-comparison",
+    "sys-exit-alias",
+
+    "unnecessary-dict-index-lookup",
+    "unnecessary-list-index-lookup",
+
+    "empty-comment",
+    "collapsible-else-if",
+
+
+    # ============================================================
+    # Selected Refurb rules
+    # ============================================================
+
+    "print-empty-string",
+    "f-string-number-format",
+    "readlines-in-for",
+    "check-and-remove-from-set",
+
+    "verbose-decimal-constructor",
+    "bit-count",
+    "fromisoformat-replace-z",
+    "redundant-log-base",
+    "unnecessary-from-float",
+    "int-on-sliced-str",
+    "regex-flag-alias",
+
+    "isinstance-type-none",
+    "type-none-comparison",
+    "single-item-membership-test",
+
+    "implicit-cwd",
+    "hashlib-digest-hex",
+    "slice-to-remove-prefix-or-suffix",
+    "sorted-min-max",
+
+
+    # ============================================================
+    # Selected tryceratops rules
+    # ============================================================
+
+    "type-check-without-type-error",
+    "verbose-raise",
+    "useless-try-except",
+    "error-instead-of-exception",
+    "verbose-log-message",
+]
+
+ignore = [
+    # ============================================================
+    # Builtins
+    # ============================================================
+
+    # Class attributes such as model fields named `id` are legitimate.
+    "builtin-attribute-shadowing",
+
+
+    # ============================================================
+    # Simplification — readability wins over shorter syntax
+    # ============================================================
+
+    # Do not force if/else into ternaries.
+    "if-else-block-instead-of-if-exp",
+
+    # Do not force branch logic into dict dispatch.
+    "if-else-block-instead-of-dict-lookup",
+
+
+    # ============================================================
+    # Comprehensions
+    # ============================================================
+
+    # Can change semantics for mapping-like inputs.
+    "unnecessary-comprehension",
+
+
+    # ============================================================
+    # pathlib
+    # ============================================================
+
+    # These os.path/glob APIs are not semantically identical to
+    # their suggested pathlib replacements.
+    "os-path-abspath",
+    "os-path-expanduser",
+    "os-path-basename",
+    "os-path-dirname",
+    "os-path-splitext",
+
+    # Builtin open() is perfectly valid and often clearer than
+    # constructing Path solely to call .open().
+    "builtin-open",
+
+    # Path(".") is intentionally more explicit than Path().
+    "path-constructor-current-directory",
+
+    # These are often string/list APIs rather than Path operations.
+    "os-sep-split",
+    "glob",
+    "os-listdir",
+
+
+    # ============================================================
+    # About TODOs
+    # ============================================================
+
+    # Our convention uses issue links, not person ownership:
+    # Convention:TODO: <issue-link> - <description>
+    "missing-todo-author",
+
+
+    # ============================================================
+    # Pylint
+    # ============================================================
+
+    # Iterating over a set is legitimate when ordering is irrelevant.
+    "iteration-over-set",
+
+    # Defining __eq__ without __hash__ can intentionally make
+    # instances unhashable.
+    "eq-without-hash",
+
+    # ============================================================
+    # Django
+    # ============================================================
+
+    # Django model string field should not be nullable.
+    "django-nullable-model-string-field",
+
+    # Django locals should not be used in render function.
+    "django-locals-in-render-function",
+
+    # Django exclude should not be used with model form.
+    "django-exclude-with-model-form",
+
+    # Django all should not be used with model form.
+    "django-all-with-model-form",
+
+    # Django non-leading receiver decorator should not be used.
+    "django-non-leading-receiver-decorator",
+]
+
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+#
+# This is currently disabled by default, but it is planned for this
+# to be opt-out in the future.
+docstring-code-format = true
+
+[tool.ruff.lint.flake8-comprehensions]
+# dict(foo=1, bar=2) remains a valid and readable style.
+allow-dict-calls-with-keyword-arguments = true
+
+[tool.ruff.lint.flake8-tidy-imports]
+
+# Personal convention: no leading-dot relative imports.
+ban-relative-imports = "all"
+
+[tool.pyright]
+# "standard" is a strong general baseline. Use "strict" for codebases that are ready to keep it clean.
+typeCheckingMode = "standard"
+venvPath = "."
+venv = ".venv"
+# Reject syntax and types newer than the minimum supported Python version.
+pythonVersion = "3.13"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra"]
+
+[tool.coverage.run]
+branch = true
+# This repository's executable baseline is its automation and safety tooling.
+# Replace this path with your application package after creating it.
+source = [".cursor/hooks", ".github/scripts", "scripts"]
+omit = ["*/tests/*", "*/migrations/*"]
+
+[tool.coverage.report]
+fail_under = 95
+show_missing = true
+
+[tool.markdownlint-cli2]
+globs = ["**/*.{md,mdc}"]
+ignores = [".venv/**", "**/node_modules/**"]
+
+[tool.markdownlint-cli2.config]
+MD013 = { line_length = 120, code_blocks = false, tables = false }
+MD024 = { siblings_only = true }
+MD029 = { style = "ordered" }
+MD060 = false
+
+# TODO: Replace `app` with your Python package name when you start a real project.
+[tool.importlinter]
+root_package = "app"
+include_external_packages = true
+exclude_type_checking_imports = false
+
+# TODO: Replace `app` with your Python package name when you start a real project.
+[[tool.importlinter.contracts]]
+id = "bounded-contexts-acyclic"
+name = "Bounded contexts remain acyclic"
+type = "acyclic_siblings"
+ancestors = ["app"]
+depth = 0

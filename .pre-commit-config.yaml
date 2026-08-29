@@ -1,0 +1,75 @@
+# Keep hook revisions aligned with the versions in pyproject.toml / uv.lock.
+# Update ruff-pre-commit's `rev` when you bump the Ruff version in this project.
+default_install_hook_types:
+  - pre-commit
+  - pre-push
+default_stages:
+  - pre-commit
+minimum_pre_commit_version: "3.2.0"
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: debug-statements
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.12.5
+    hooks:
+      - id: uv-lock
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.3
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+        types_or: [python, pyi]
+      - id: ruff-format
+        types_or: [python, pyi]
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.23.2
+    hooks:
+      - id: markdownlint-cli2
+        args:
+          - --fix
+          - --config
+          - pyproject.toml
+          - --configPointer
+          - /tool/markdownlint-cli2
+        files: \.(md|mdc)$
+        types: [file]
+
+  - repo: local
+    hooks:
+      - id: pyright
+        name: pyright
+        entry: uv run pyright
+        language: system
+        pass_filenames: false
+        types_or: [python, pyi]
+      - id: import-linter
+        name: import-linter
+        entry: uv run lint-imports
+        language: system
+        pass_filenames: false
+        # TODO: change the `app` name to the actual name of the app
+        files: ^app/
+      - id: pytest-cov
+        name: pytest coverage (>= 95%)
+        entry: uv run pytest --cov --cov-report=term-missing
+        language: system
+        pass_filenames: false
+        # TODO: change the `app` name to the actual name of the app
+        files: ^(app/|tests/)
+        stages: [pre-push]

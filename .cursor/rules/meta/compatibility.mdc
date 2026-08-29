@@ -1,0 +1,43 @@
+---
+alwaysApply: true
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Rule-set compatibility
+
+- Treat the versions declared by the current project as authoritative.
+  Inspect `pyproject.toml`, lock files, framework configuration, and other dependency metadata
+  when behavior depends on a particular language, framework, library, or tool version.
+
+- The reviewed versions below are documentation and behavior baselines used when these rules were last validated.
+  They are not dependency requirements for this repository.
+
+- Before applying version-sensitive guidance, compare the project's declared version with the reviewed baseline.
+
+- If the project uses an older version than the reviewed baseline,
+  do not use APIs or behavior that may have been introduced later without verifying availability
+  in the project's actual version.
+
+- If the project uses a newer major or minor version than the reviewed baseline,
+  do not assume version-sensitive rules are still current.
+  Verify the affected behavior against the newer official documentation when practical
+  and mention when the relevant rule area may need review or updating.
+
+- Do not produce compatibility warnings for unrelated changes
+  or merely because a newer patch release exists unless that patch materially changes the behavior in question.
+
+## Reviewed baselines
+
+|              Rule area               |         Reviewed baseline         | Reviewed on |
+| :----------------------------------: | :-------------------------------: | :---------: |
+| Python language and standard library |              3.14.7               | 2026-08-20  |
+|                  uv                  |              0.12.x               | 2026-08-20  |
+|                 Ruff                 |              0.16.3               | 2026-08-20  |
+|               Pyright                |              1.1.411              | 2026-08-20  |
+|                pytest                |               9.1.1               | 2026-08-20  |
+|            pytest-django             |              4.14.0               | 2026-08-20  |
+|                Django                |                6.1                | 2026-08-20  |
+|        Django REST Framework         |              3.18.0               | 2026-08-20  |
+|            Import Linter             |               2.13                | 2026-08-20  |
+|         Cursor Project Rules         | Current unversioned documentation | 2026-08-20  |

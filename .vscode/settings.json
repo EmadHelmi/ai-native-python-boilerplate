@@ -1,0 +1,13 @@
+{
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+  "cSpell.words": [],
+  "markdownlint.configFile": "pyproject.toml",
+  "markdownlint.configPointer": "/tool/markdownlint-cli2"
+}

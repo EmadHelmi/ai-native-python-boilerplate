@@ -1,0 +1,220 @@
+---
+description: "Application-layer and DDD service-boundary rules. Apply when creating or changing use cases, application services, domain services, commands, queries, DTOs, read models, projections, CQRS, result models, exception/error boundaries, validation boundaries, or cross-layer input/output mapping."
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Application and service boundaries
+
+## Domain and application services
+
+- Prefer behavior on the entity or value object that naturally owns the invariant.
+  Introduce a domain service only when important domain behavior does not belong naturally to a single domain object.
+
+- Use a domain service for stateless domain behavior that spans multiple domain concepts
+  and has no natural entity or value-object owner.
+
+- Name domain services after the domain capability or policy they represent.
+  Avoid vague `<Entity>Service` names when a more precise domain term exists.
+
+- Keep domain services independent of persistence and application orchestration.
+  Prefer passing required domain state rather than injecting repositories or infrastructure dependencies.
+
+- If domain behavior genuinely requires an external capability,
+  depend on an inner-layer-owned port rather than a concrete infrastructure implementation.
+
+- Use application services or use cases to orchestrate a user or system goal:
+  load required state, invoke domain behavior, coordinate aggregates and ports,
+  define transaction boundaries, and produce an application result.
+
+- Do not duplicate entity, value-object, or aggregate invariants in application services.
+  Invoke domain behavior rather than reconstructing business rules from domain state.
+
+- Distinguish domain decisions from workflow decisions.
+  Rules about what the business means belong in the domain;
+  decisions about application flow or external adapters belong in the application layer.
+
+- Prefer application services/use cases with one cohesive goal.
+  Avoid generic services that accumulate unrelated operations around an entity.
+
+- Use a function for a simple stateless use case.
+  Introduce a class when the use case owns meaningful dependencies, configuration, lifecycle, or reusable orchestration.
+
+- When a class represents exactly one application use case, a single `execute()` entry point is acceptable.
+  Domain services should expose domain-language operations rather than generic `execute()` methods.
+
+- Keep application inputs and outputs independent of delivery and persistence frameworks.
+  Use commands, DTOs, identities, domain values, or application result types instead of requests,
+  serializers, query objects, ORM models, or task-framework objects.
+
+- Coordinate side effects in the application layer and preserve transaction semantics;
+  side effects requiring committed state must occur only after the commit succeeds.
+
+## DTOs, commands, queries, and boundary models
+
+- Use explicit boundary types when data crosses an architectural boundary and the shape has meaningful semantics.
+  Do not introduce DTOs merely to copy fields between nearby functions with no real boundary.
+
+- Prefer typed boundary models over unstructured dictionaries when the data shape is known and stable.
+  Use mappings or `Any` only at genuinely dynamic boundaries.
+
+- Keep DTOs, commands, and result models primarily as data contracts.
+  Do not move domain behavior or invariants into transport objects.
+
+- Use a command to represent an explicit application intent that may change system state.
+  Name it after the requested action rather than the underlying entity or transport payload.
+
+- Use a query to represent a meaningful application read request.
+  Queries must not mutate domain state as a side effect.
+
+- Do not require a command or query object for every application call.
+  Pass explicit parameters directly when they are smaller and clearer.
+
+- Make commands, queries, and simple boundary DTOs immutable by default
+  unless mutation is part of their explicit purpose.
+
+- Do not use ORM models, serializers, HTTP objects, or framework-specific schemas as cross-layer DTOs.
+  Translate them at the boundary that owns the framework.
+
+- Do not confuse domain objects with DTOs.
+  Domain objects model behavior and invariants; DTOs model data crossing a boundary.
+
+- Perform mapping at the boundary that owns the translation.
+  Domain objects should not know how to serialize themselves for HTTP, ORM, queues, or external APIs.
+
+- Use simple mapping functions by default.
+  Introduce mapper objects only when mapping has meaningful state, configuration, polymorphism, or complexity.
+
+- Application result types should expose application/domain outcomes,
+  not presentation concerns such as HTTP status codes, response envelopes, or localized messages.
+
+- Do not introduce generic `Result` or `Either` wrappers by default.
+  Use ordinary return values and explicit domain/application exceptions unless
+  error-as-data semantics provide concrete value.
+
+- Treat DTOs that cross process or public API boundaries as versioned external contracts.
+  Preserve compatibility or provide an explicit migration strategy when they change.
+
+## Read models, query architecture, and CQRS
+
+- Do not introduce full CQRS merely to follow an architectural pattern.
+  Use a conventional shared read/write model when the domain and access requirements remain simple.
+
+- Design the write model around domain behavior, invariants, and consistency.
+  Do not distort aggregate boundaries or domain objects merely to satisfy read or presentation needs.
+
+- Optimize read paths for the information callers need.
+  Use projections, joins, denormalized data, or specialized read models
+  rather than loading aggregates that will not perform domain behavior.
+
+- Allow read-model implementations to use persistence technology directly
+  when that keeps the query simple and isolated.
+  Do not force aggregate-repository abstractions onto read-only paths.
+
+- Do not leak ORM query objects or query-building APIs across the application boundary.
+  Return explicit read models or application-facing result types.
+
+- Keep read models separate from domain objects when their shape exists for presentation,
+  reporting, search, or query efficiency rather than domain behavior.
+
+- Allow read models to duplicate or denormalize data
+  when doing so materially improves query simplicity or performance.
+
+- Apply CQRS selectively to bounded contexts or use cases that benefit from it.
+  Do not require a system-wide CQRS architecture merely for consistency of style.
+
+- Separate read and write datastores only when independent scaling, query shape,
+  latency, availability, or technology requirements justify the operational complexity.
+
+- When read models are updated asynchronously,
+  treat staleness and eventual consistency as explicit application behavior.
+
+- Do not use an eventually consistent read model as the authoritative source for command-side invariants.
+  Revalidate business-critical conditions against the authoritative write-side consistency boundary.
+
+- Keep query paths free from domain state transitions and command-side business behavior.
+  Read models may derive presentation values but must not become an alternate place for domain policy.
+
+- Read models may expose presentation-oriented capability hints,
+  but command-side authorization and invariants must still be evaluated authoritatively.
+
+- Enforce access control and data-exposure rules on query paths.
+  Separating reads from writes does not remove authorization requirements from reads.
+
+- Name queries and read services after the information or use case they provide.
+  Avoid generic `get_data`, `fetch`, or `<Entity>QueryService` APIs that hide query intent.
+
+- Do not introduce generic query repositories that recreate ORM filtering and pagination.
+  Prefer explicit query contracts for meaningful read use cases.
+
+- Represent filtering, sorting, and pagination through explicit query parameters or query-specific types,
+  rather than leaking persistence-specific lookup syntax across architectural boundaries.
+
+- Prefer datastore-native aggregation and projection for reporting and read-heavy workloads.
+  Do not hydrate domain aggregates merely to count, group, search, or summarize data.
+
+- Treat Event Sourcing and CQRS as independent architectural choices.
+  Do not introduce Event Sourcing merely because read and write models are separated.
+
+- Do not require asynchronous messaging merely because commands and queries are separated.
+  Commands may execute synchronously when that best fits the use case.
+
+- When a read model is asynchronously derived from authoritative data,
+  provide repair or rebuild mechanisms when its operational importance justifies them.
+
+## Exceptions and error boundaries
+
+- Define domain exceptions for business failures with meaningful domain semantics.
+  Prefer precise domain names over generic `DomainError`, `BusinessError`, or `OperationFailed` failures.
+
+- Define exceptions in the innermost layer that owns the meaning of the failure.
+  Outer layers may translate technical failures into inner-layer concepts;
+  inner layers must not depend on framework- or infrastructure-specific exception types.
+
+- Do not leak database, ORM, HTTP-client, broker, filesystem, or framework exceptions across architectural boundaries.
+  Translate them when the caller needs a stable domain or application meaning.
+
+- Translate an exception only when crossing the boundary changes its meaning or hides an implementation detail.
+  Do not wrap every exception in a generic application or domain error.
+
+- Catch exceptions only where code can recover, translate, add meaningful context,
+  enforce a boundary policy, or perform required cleanup.
+  Otherwise let them propagate.
+
+- Use broad exception catches only at intentional isolation boundaries
+  where arbitrary failures must be contained, observed, translated, or retried.
+
+- Preserve causal context when translating exceptions through explicit exception chaining
+  unless intentionally suppressing the original cause is part of the boundary contract.
+
+- Use built-in exceptions for ordinary programming or API-contract violations.
+  Prefer domain-specific exceptions when a failure has business meaning callers may need to distinguish.
+
+- Distinguish invalid external input from valid input that violates a domain rule.
+  Input validation belongs at the delivery or application boundary;
+  domain invariant failures belong to the domain.
+
+- Use application exceptions for use-case failures that are meaningful to callers
+  but are not themselves domain invariants.
+
+- Keep domain and application exceptions transport-agnostic.
+  HTTP status codes, response schemas, localization, and other presentation concerns belong to the delivery layer.
+
+- Do not require callers to inspect exception message text.
+  Represent machine-relevant failure information through exception types or structured attributes.
+
+- Keep user-facing localization out of domain exception semantics.
+  Carry structured failure context and let the presentation layer produce external-facing messages.
+
+- Translate third-party exceptions at adapter boundaries into stable capability-oriented failures
+  when callers should not depend on a specific provider's exception model.
+
+- Make retry decisions from failure semantics.
+  Do not retry deterministic business-rule failures as if they were transient infrastructure failures.
+
+- Use exceptions for failure semantics rather than as a substitute for normal branching
+  when absence or an alternative outcome is part of the expected API contract.
+
+- Do not use `assert` for business rules, authorization, external input validation,
+  or recoverable runtime invariants.

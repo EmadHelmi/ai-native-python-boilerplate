@@ -1,0 +1,111 @@
+---
+globs: "**/*.py"
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Django and DRF core
+
+## HTTP and application boundaries
+
+- Follow the repository's established Django and DRF architecture.
+  Do not introduce a parallel serializer, view, service, or domain pattern for a local change.
+
+- Give transport concerns, meaningful application orchestration, and domain behavior clear ownership.
+  This does not require separate layers when framework-native code remains cohesive.
+  HTTP parsing, serialization, authentication, permissions, and transport validation belong at the delivery boundary;
+  business invariants must remain enforceable independently of HTTP.
+
+- Use Django and DRF generic views, viewsets, serializers, and framework hooks
+  when they express a straightforward use case clearly.
+  Do not introduce additional layers merely to wrap simple framework behavior.
+
+- When a use case contains meaningful orchestration or domain behavior,
+  keep the view focused on the HTTP boundary and delegate behavior to the appropriate application or domain component.
+
+- Use serializers for transport-shape validation, deserialization, and API-facing validation.
+  Do not make serializers the sole owner of business invariants that must hold outside the HTTP API.
+
+- When validating partial updates, account explicitly for omitted fields;
+  do not assume serializer validation receives complete object state.
+
+- In DRF generic views, use framework extension points such as `get_queryset()`,
+  `get_serializer_class()`, and appropriate `perform_*()` hooks
+  rather than bypassing or duplicating their lifecycle behavior.
+
+- Do not use arbitrary line-count thresholds to determine architectural ownership.
+  Move logic when doing so improves cohesion, reuse, testability, or dependency direction.
+
+## Application initialization
+
+- Keep Django module import and application initialization free of database queries
+  and unnecessary runtime work.
+
+- Use `AppConfig.ready()` for lightweight registration and application wiring,
+  not for database access, remote calls, business initialization, or deployment workflows.
+
+- Make initialization and registration idempotent when Django's lifecycle or tests
+  may cause setup code to execute more than once.
+
+## Signals
+
+- Prefer explicit calls when the producer and consumer are both owned by the project.
+  Do not introduce Django signals merely to avoid a visible dependency.
+
+- Use signals for genuine framework hooks, extension points, or sufficiently decoupled reactions
+  where implicit dispatch provides concrete value.
+
+- Keep signal receivers small and delegate substantial behavior to explicit application code.
+
+- Register receivers through deliberate application initialization
+  and guard against accidental duplicate registration when necessary.
+
+## Async boundaries
+
+- Use async Django code when a use case benefits from asynchronous I/O or concurrency;
+  do not convert synchronous request paths to async merely for stylistic consistency.
+
+- In async code, use Django's async-capable APIs when available.
+  Bridge genuinely synchronous code deliberately rather than calling async-unsafe APIs
+  from an event-loop context.
+
+- Keep sync/async boundaries explicit and minimize unnecessary transitions.
+
+- Do not use `DJANGO_ALLOW_ASYNC_UNSAFE` as a normal workaround for async-safety errors.
+
+## Background entry points
+
+- Keep background-job and worker entry points focused on the job-runtime boundary:
+  normalize delivery input, invoke the appropriate behavior, and translate the outcome.
+  Delegate meaningful reusable application or domain behavior when it exists,
+  but do not add an indirection layer solely to make a simple job entry point thinner.
+
+- Pass stable identities or explicit message contracts across process boundaries
+  rather than serialized ORM instances or mutable framework objects.
+
+## Configuration
+
+- Put deployment-, environment-, and installation-specific configuration behind Django's settings boundary.
+  Do not scatter environment-variable reads throughout application modules.
+
+- Keep Django settings access out of framework-agnostic domain code.
+  Pass configured values inward when the domain needs them.
+
+- Keep non-configurable domain concepts with the code that owns them
+  unless an explicit project convention deliberately centralizes them elsewhere.
+
+## Internationalization
+
+- Mark user-visible text for translation when localization is part of the product,
+  following the project's established translation and message conventions.
+
+- Use lazy translation when translation must be deferred,
+  especially for declarative values created at module or class definition time.
+
+## Authentication model references
+
+- Do not depend directly on Django's concrete built-in `User` model
+  in code that should support a swappable user model.
+  Use `settings.AUTH_USER_MODEL` for model relationships and import-time references,
+  and `get_user_model()` when the concrete model is needed at runtime.

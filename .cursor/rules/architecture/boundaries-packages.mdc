@@ -1,0 +1,134 @@
+---
+description: "Module, package, and bounded-context boundary rules. Apply when creating, moving, or reorganizing packages/modules; changing cross-layer or cross-context imports; defining public seams/shared kernels; wiring dependencies; using DI/composition roots; enforcing architecture; or deciding package/folder structure."
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Module and bounded-context boundaries
+
+## Cross-boundary and module boundaries
+
+- Give each architectural module or bounded context a small, deliberate public seam.
+  External callers should depend on that seam rather than importing internal implementation modules directly.
+
+- Treat code outside the declared public seam as implementation detail,
+  even when Python technically allows importing it.
+
+- Do not use another bounded context's ORM models, repositories, or internal services as cross-context contracts.
+  Exchange stable identities, explicit DTOs, application contracts, or events instead.
+
+- Cross boundaries using stable identities or explicit snapshots/contracts
+  rather than mutable domain objects owned by another context.
+
+- Keep shared-kernel code minimal and genuinely universal.
+  Do not move domain concepts into `shared`, `common`, `core`, or `utils`
+  merely because more than one context currently uses them.
+
+- Prefer small intentional duplication over cross-context coupling
+  when concepts may evolve independently.
+
+- Share a domain abstraction only when its meaning, invariants, and lifecycle are genuinely shared,
+  not merely because names or current fields look similar.
+
+- Make dependencies between bounded contexts directional and explicit.
+  Avoid mutual imports and bidirectional service dependencies.
+
+- Translate external or foreign domain models at their boundary.
+  Do not let another system's terminology, schemas, status codes, or object model become the internal domain model accidentally.
+
+- Design integration contracts independently from internal object structure.
+  Do not serialize entities or aggregates wholesale as external or cross-context contracts.
+
+- Inner layers must depend on contracts, not concrete outer-layer implementations.
+  Bind implementations at the composition root or another explicit assembly boundary.
+
+- Centralize dependency assembly in a composition root or equivalent boundary.
+  Do not instantiate concrete infrastructure dependencies throughout domain and application code.
+
+- Prefer explicit constructor or function injection.
+  Introduce a dependency-injection framework only when assembly complexity justifies it.
+
+- Avoid service-locator patterns in domain and application code.
+  Dependencies should remain visible in constructors or function signatures.
+
+- Treat circular imports between architectural modules as a design signal.
+  Do not use `TYPE_CHECKING`, local imports, or import indirection merely to conceal circular dependencies.
+
+- Keep public seams intentionally small.
+  Expose only contracts other modules are expected to depend on.
+
+- For cross-context reporting and read composition, prefer dedicated query/read models
+  rather than coupling domain aggregates solely for presentation needs.
+
+- Do not couple bounded contexts merely to obtain a shared database transaction.
+  Require immediate cross-context consistency only when a business invariant truly demands it;
+  otherwise prefer explicit coordination or eventual consistency.
+
+## Architecture enforcement
+
+- Treat stable architectural dependency rules as executable constraints when practical,
+  not merely documentation or code-review conventions.
+
+- Enforce layer direction, forbidden dependencies, bounded-context cycles,
+  and protected internal modules with architecture tooling rather than relying on developers to remember them.
+
+- Keep architectural exceptions explicit and narrowly scoped.
+  Do not weaken a contract globally to accommodate one exceptional dependency.
+
+- Do not use `TYPE_CHECKING`, local imports, dynamic imports, or indirection to bypass an architectural dependency rule.
+
+- Keep architecture checks in the normal validation and CI workflow so a dependency violation fails before merge.
+
+- Test semantic architectural invariants with ordinary tests when they cannot be expressed reliably as import constraints.
+  Do not add architecture-specific tooling for rules that existing linters, type checkers, or tests already enforce well.
+
+- Every architecture-contract exception must be narrow, documented, and temporary or structurally justified.
+  Never add wildcard ignores merely to make the architecture check pass.
+
+## Package and folder structure
+
+- Organize packages around meaningful architectural or domain boundaries.
+  Do not create layers or directories solely to match a Clean Architecture template.
+
+- Prefer organizing substantial business code by domain capability or bounded context
+  rather than globally grouping everything by technical role.
+
+- Introduce subpackages such as `domain`, `application`, `infrastructure`, or `presentation`
+  only when the corresponding responsibility is substantial enough to justify a package.
+
+- Do not create one-file directory hierarchies merely to advertise architectural layers.
+  Let package depth grow with real complexity.
+
+- Group code by cohesive concepts before grouping it by artifact type.
+  Create `entities`, `services`, `events`, `repositories`, or similar subpackages
+  only when doing so materially improves navigation.
+
+- Keep tightly related domain types close together.
+  Split modules when they become difficult to navigate or contain independently evolving concepts.
+
+- Do not enforce one class or one type per file.
+  Prefer cohesive modules over artificial fragmentation.
+
+- Avoid generic `utils`, `helpers`, `common`, or `misc` packages
+  for code with a clear domain or architectural owner.
+
+- Keep shared packages small and domain-neutral;
+  do not use them to avoid choosing an owner for business behavior.
+
+- Structure infrastructure according to concrete technical capabilities when that improves ownership;
+  do not force one universal adapter taxonomy.
+
+- Organize application code around cohesive use cases when practical.
+  Keep a use case's command, result, and orchestration close together
+  unless shared contracts justify separation.
+
+- Prefer package names that communicate ownership or capability.
+  Avoid vague buckets such as `managers`, `processors`, or generic `services`
+  when a more precise concept exists.
+
+- Make package structure reinforce the declared public seam,
+  without requiring a specific facade filename or folder naming scheme.
+
+- Do not assume framework boundaries such as Django apps are identical to bounded contexts.
+  Align them when useful, but keep the architectural boundaries explicit when they differ.

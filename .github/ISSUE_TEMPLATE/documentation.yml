@@ -1,0 +1,39 @@
+name: Documentation
+description: Report unclear, missing, outdated, or incorrect documentation.
+title: "docs: "
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Documentation location
+      description: Link to or name the affected file and section.
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Explain what is unclear, missing, outdated, or incorrect.
+    validations:
+      required: true
+
+  - type: textarea
+    id: improvement
+    attributes:
+      label: Suggested improvement
+      description: Describe the outcome that would make the documentation useful.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact
+      options:
+        - Blocks setup or normal use
+        - Causes a likely implementation mistake
+        - Makes maintenance or contribution difficult
+        - Minor clarity or presentation issue
+    validations:
+      required: true

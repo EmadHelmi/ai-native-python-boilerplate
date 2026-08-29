@@ -1,0 +1,133 @@
+---
+globs: "**/tests.py,**/tests/**/*.py,**/test_*.py,**/*_test.py"
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Django and DRF tests
+
+## Django test boundaries
+
+- Use the Django testing style already configured by the repository,
+  whether Django's unittest-based classes, pytest-django, or a compatible combination.
+  Do not migrate frameworks as part of an unrelated change.
+
+- Keep framework-independent tests independent of Django.
+  Use Django test cases or database access only when behavior genuinely depends on Django or persisted state.
+
+- Use the lightest Django test boundary that can prove the behavior:
+  `SimpleTestCase` when database access is unnecessary,
+  `TestCase` for ordinary isolated database-backed behavior,
+  and `TransactionTestCase` only when real commits, rollbacks,
+  transaction visibility, or locking semantics must be observed.
+
+- When the repository uses pytest-django, request database access explicitly
+  and use transactional database mode only when real transaction semantics are part of the test.
+
+- Do not use full transactional tests merely because production code contains `atomic()`.
+  Use them when transaction boundaries themselves affect the behavior being proved.
+
+## Database and transaction behavior
+
+- Test `select_for_update()` and other behavior that depends on real transaction state
+  with a true transactional test boundary.
+  Do not rely on `TestCase` when its enclosing transaction can hide incorrect production usage.
+
+- When testing `transaction.on_commit()` inside `TestCase`,
+  use Django's commit-callback testing support rather than assuming the test transaction commits.
+
+- Use a real transactional test when actual commit visibility,
+  rollback behavior, or transaction isolation is what must be observed.
+
+- When persistence itself is part of the behavior under test,
+  assert persisted state rather than relying only on an already-mutated in-memory model instance.
+
+- Run database-sensitive integration tests against the production database engine
+  when correctness depends on backend-specific SQL, constraints, locking,
+  isolation, indexes, or data-type semantics.
+
+- Declare database access narrowly in multi-database tests.
+  Test routing or database-specific behavior against the intended aliases explicitly.
+
+## ORM performance
+
+- Assert query counts when query volume is itself a meaningful performance contract
+  or when protecting against a specific N+1 regression.
+  Do not freeze incidental query counts throughout the suite merely because they are measurable.
+
+## Test data and settings
+
+- Build only the database state required by the scenario.
+
+- Prefer explicit ORM construction, existing factories, builders, or focused fixtures
+  over large serialized Django fixture files for ordinary tests.
+
+- Use serialized fixtures when a stable shared dataset is genuinely the clearest representation.
+
+- When using Django `TestCase`, consider `setUpTestData()` for genuinely shared,
+  effectively immutable database setup whose repeated creation is materially expensive.
+  Do not use it to share mutable scenario state between tests.
+
+- Override Django settings through Django's testing mechanisms
+  or the configured pytest integration.
+  Do not mutate settings directly without automatic restoration.
+
+- Do not assume settings overrides affect values copied into module-level constants.
+  Exercise the same configuration access path used by production code.
+
+## API testing
+
+- Use DRF's API testing utilities when testing DRF behavior.
+
+- Choose the API client that matches the boundary being tested.
+  Use request factories for focused view behavior,
+  API clients for ordinary HTTP/API behavior,
+  and live/interface-level clients only when the broader server boundary matters.
+
+- Do not use request factories when middleware, routing,
+  authentication integration, or other request-stack behavior is part of the contract.
+
+- Use forced authentication when authentication itself is outside the behavior under test.
+  When testing authentication, credentials, sessions, tokens, or permission integration,
+  exercise the real configured authentication path.
+
+- Do not infer CSRF correctness from tests that bypass CSRF checks.
+  Exercise CSRF validation explicitly when it is part of the contract.
+
+- At the API boundary, assert externally observable behavior:
+  status, response data, relevant headers, and required persisted or emitted effects.
+
+- Prefer DRF response data for semantic API assertions.
+  Assert rendered content only when rendering or representation itself is part of the contract.
+
+## Async and live tests
+
+- Use synchronous tests for async views when only their HTTP result matters
+  and the normal Django test client proves it adequately.
+
+- Use Django's asynchronous test client when the test itself is asynchronous
+  or ASGI request behavior must be exercised.
+
+- Keep decorators and helpers compatible with asynchronous test execution.
+
+- Use a live-server test only when browser, server, or true HTTP-boundary behavior is required.
+  Prefer faster in-process clients for ordinary endpoint behavior.
+
+## Framework integrations
+
+- When testing Django email behavior, prefer the configured test email backend and outbox
+  over mocking Django's entire mail subsystem.
+
+- Add focused migration tests when custom data transformation,
+  historical-model behavior, reversibility, or deployment compatibility carries meaningful risk.
+
+- Use Django or DRF-specific test assertions when they express framework semantics
+  more clearly or provide materially better diagnostics than generic assertions.
+
+- Follow the general Python testing rules for determinism, mocking,
+  parameterization, regression testing, test levels, and external dependencies.
+
+- When authentication or authorization is part of an endpoint contract,
+  cover the relevant allowed, unauthenticated, and forbidden outcomes.
+  Do not test only the successful authorized path.

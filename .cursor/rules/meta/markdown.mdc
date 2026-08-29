@@ -1,0 +1,112 @@
+---
+globs: "**/*.md, **/*.mdc"
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Markdown documentation
+
+## Mechanical Markdown rules
+
+- Before creating or editing Markdown, inspect `pyproject.toml` for
+  `[tool.markdownlint-cli2.config]` when that section exists.
+  Treat the configured markdownlint rules as the authoritative source for mechanical Markdown style.
+
+- Do not duplicate, reinterpret, or override lintable formatting rules in prose.
+  If Markdown tooling is configured elsewhere by the repository, follow that configuration instead.
+
+- When no Markdown linter configuration exists, preserve the repository's established Markdown style
+  rather than introducing a new formatting convention as part of an unrelated change.
+
+## Long documents and navigation
+
+- Add a table of contents only when a document is long enough or has enough heading depth
+  that explicit navigation materially helps the reader.
+
+- Consider a TOC when a document exceeds roughly one page of normal reading,
+  contains many major sections, or has multiple levels of headings and subheadings.
+
+- When a TOC is useful, prefer a collapsible TOC using HTML details/summary syntax
+  only when the target renderer and repository Markdown configuration support it.
+  Otherwise, use the clearest supported non-collapsible TOC.
+
+- Keep the TOC synchronized with the actual heading structure.
+  Update it whenever headings are added, removed, renamed, or reordered.
+
+- Do not add a TOC to short documents where it creates more noise than navigation value.
+
+## Documentation quality
+
+- Write for the reader's task: establish purpose, scope, prerequisites, or the important decision
+  before implementation detail when that context is necessary to use the document correctly.
+
+- Keep documentation concise and scannable without removing information required to understand,
+  operate, maintain, or safely change the documented behavior.
+
+- Prefer one authoritative source for facts that can drift, such as configuration, supported versions,
+  defaults, generated values, or commands. Reference the owning code or configuration instead of copying it
+  into multiple Markdown files unless duplication materially improves usability and has a clear maintenance owner.
+
+- Use repository-relative links for repository-local documentation and files when practical,
+  and use descriptive link text that communicates the destination or purpose.
+
+- Keep commands and examples copyable and faithful to the environment they claim to represent.
+  Do not include shell prompt characters in command snippets unless the snippet intentionally represents a transcript.
+
+- Distinguish normative requirements from examples, suggestions, historical notes, and illustrative values
+  when confusing them could change how the reader uses the system.
+
+- Use prose for explanation, lists for steps or compact collections, tables for structured comparisons,
+  and diagrams for relationships or flows. Do not force information into a more complex representation
+  when a simpler one communicates it more clearly.
+
+- Preserve established project terminology, public names, identifiers, commands, and configuration keys exactly
+  when documentation refers to concrete project interfaces.
+
+- Prefer document structure that supports progressive reading:
+  use headings, summaries, tables, diagrams, and collapsible sections
+  when they improve navigation and comprehension.
+
+## Diagrams and visual relationships
+
+- When a conceptual graph, relationship, architecture, workflow, state transition, sequence, or dependency
+  would otherwise be represented as ASCII art or a plain-text diagram inside a code block,
+  use Mermaid when the target Markdown renderer supports it and Mermaid can express the concept clearly.
+
+- Choose a Mermaid diagram type that matches the semantics, such as `flowchart`, `sequenceDiagram`,
+  `classDiagram`, `stateDiagram-v2`, `erDiagram`, `gitGraph`, `mindmap`, or another supported diagram type.
+  Do not force every relationship into a generic flowchart when a more accurate Mermaid model exists.
+
+- Keep Mermaid diagrams structurally simple and portable.
+  Prefer meaningful node and edge labels and explicit boundaries over decorative styling,
+  renderer-specific tricks, custom themes, or complex layout hacks.
+
+- Use valid Mermaid syntax rather than pseudo-diagram text inside a `mermaid` fence.
+  If the project's renderer or Mermaid version cannot represent the intended diagram reliably,
+  fall back to the clearest supported representation and explain the relationship in prose when needed.
+
+- Do not replace literal text artifacts with Mermaid.
+  Filesystem trees, command output, logs, stack traces, protocol transcripts, configuration examples,
+  and source-code examples should remain literal when their exact textual form is what the reader needs.
+
+- Do not add a diagram when a short sentence, list, or table communicates the same information more clearly.
+  Mermaid is the default alternative to hand-written text diagrams, not a requirement to visualize every concept.
+
+- For important or non-trivial diagrams, include enough surrounding prose that the document's critical meaning
+  remains understandable even when the diagram is not rendered or cannot be viewed accessibly.
+
+## Tables
+
+- Center-align Markdown table columns by default using `:---:`
+  when explicit alignment improves consistency and readability.
+
+- Override the default alignment only when another alignment is materially easier to read:
+  use `:---` for left alignment, `---:` for right alignment,
+  or `---` when forcing an alignment provides no meaningful benefit.
+
+- Choose alignment per column rather than applying one alignment mechanically to the entire table.
+  Base the decision on the content and how a human reader is likely to scan and compare it.
+
+- Preserve an existing table's intentional alignment when editing it
+  unless changing the alignment clearly improves readability.

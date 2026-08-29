@@ -1,0 +1,59 @@
+---
+description: "Concurrency and mutable-state architecture rules. Apply when changing shared state, aggregate mutation, concurrent reads/writes, database consistency constraints, optimistic/pessimistic locking, idempotency, eventual-consistency state, caches, or distributed locks."
+alwaysApply: false
+---
+
+<!-- Author: Emad Helmi <s.emad.helmi@gmail.com> (@emad.helmi) -->
+
+# Concurrency and state
+
+## State, mutability, and concurrency
+
+- Give mutable state a clear owner.
+  Avoid shared mutable state whose mutation can occur from unrelated modules or execution paths.
+
+- Avoid mutable module-level or process-global state for application and domain behavior.
+  Use explicit ownership and dependency injection when shared state is required.
+
+- Encapsulate meaningful state changes behind operations that preserve invariants.
+  Do not expose mutable state so callers must coordinate valid transitions themselves.
+
+- Prefer immutability for value objects, messages, configuration, and other values representing facts.
+  Allow controlled mutation for entities and aggregates whose lifecycle is inherently stateful.
+
+- Do not assume that an in-memory domain invariant is safe under concurrent persistence.
+  Identify invariants involving concurrent reads and writes and protect them at the transaction or persistence boundary.
+
+- Place reads, checks, and writes that jointly protect an invariant inside the same effective concurrency boundary.
+  Do not validate stale state and wrap only the final write in a transaction.
+
+- Do not treat a transaction block alone as proof of concurrency safety.
+  Use the appropriate database mechanism: locking, version checks, conditional updates,
+  uniqueness, or other constraints.
+
+- Enforce critical persistence invariants at the database level when they can be expressed reliably.
+  Domain validation should not be the only protection against concurrent writes.
+
+- Prefer optimistic concurrency when conflicts are uncommon and stale writes must be detected explicitly.
+
+- Use pessimistic locking when an invariant genuinely requires exclusive access.
+  Keep locked transactions short and avoid locking as a default safety mechanism.
+
+- Do not perform network calls or slow external I/O while holding database locks or long-lived transactions.
+
+- Design retryable commands and externally triggered state changes to be idempotent
+  when duplicate execution is possible.
+
+- Make eventual-consistency boundaries explicit.
+  Model intermediate states, retries, and failure behavior rather than assuming immediate synchronization.
+
+- Represent meaningful asynchronous or long-running lifecycle states explicitly
+  rather than hiding them behind transient booleans or infrastructure-only state.
+
+- Avoid treating long-lived in-memory aggregates as authoritative when concurrent writers may exist.
+  Reload or use an explicit concurrency strategy before committing stale mutable state.
+
+- Treat caches as derived state unless explicitly designed as authoritative.
+
+- Prefer database constraints, atomic updates, optimistic concurrency, and local locking
+  before introducing distributed locks.
