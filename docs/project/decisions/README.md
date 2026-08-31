@@ -318,7 +318,7 @@ Do not reserve ADR numbers for decisions that have not yet been made.
 | :--------------------------------------------------------: | :---------------------- | :------: |
 | [ADR-0001](0001-template-usage-profiles.md) | Template Usage Profiles | Accepted |
 
-When an ADR is added, replace the placeholder row and append the new record.
+When an ADR is added, append the new record.
 
 Example:
 

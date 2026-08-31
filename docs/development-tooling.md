@@ -98,17 +98,20 @@ package `app`. Replace those paths when the derived project creates its real
 package. Initial coverage sources measure repository automation and should be
 updated deliberately when application code exists.
 
-Repository automation and safety scripts remain covered before application
-code exists. The `solo` profile removes the PR-policy validator and updates
-coverage sources accordingly.
+Safety scripts remain covered before application code exists. Initialization
+updates coverage sources whenever host-specific automation is removed.
 
-## Collaborative and Solo Automation
+## Repository Automation
+
+<!-- template-profile:collaborative:start -->
 
 The `collaborative` profile keeps GitHub CI, compatibility checks, dependency
 review, PR policy, and Dependabot configuration.
 
-The `solo` profile removes `.github/` but retains this complete local quality
-gate. Repository visibility therefore does not change Python, Rule, or Agent
+<!-- template-profile:collaborative:end -->
+
+The complete local quality gate remains available independently of repository
+hosting. Repository visibility does not change Python, Rule, or Agent
 standards.
 
 ## VS Code

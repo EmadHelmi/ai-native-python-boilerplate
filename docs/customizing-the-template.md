@@ -1,7 +1,7 @@
 # Customizing the Template
 
-Apply these changes after selecting either the `solo` or `collaborative`
-profile. Keep customization focused on the new project's real requirements.
+Apply these changes after initializing the repository. Keep customization
+focused on the new project's real requirements.
 
 ## Project Identity
 
@@ -55,20 +55,28 @@ The template currently supports Python 3.13 and 3.14:
 
 - `requires-python` defines the minimum supported version;
 - `.python-version` selects the preferred local version;
-- `[tool.pyright].pythonVersion` checks syntax and types against the minimum;
+- `[tool.pyright].pythonVersion` checks syntax and types against the minimum.
+
+<!-- template-profile:collaborative:start -->
+
 - the collaborative CI matrix verifies supported runtime versions.
 
+<!-- template-profile:collaborative:end -->
+
 If a derived project deliberately changes support, update every applicable
-source together. A `solo` project has no GitHub CI matrix after profile setup.
+source together.
 
 ## License and Provenance
+
+<!-- template-profile:collaborative:start -->
 
 The `collaborative` profile keeps the root MIT `LICENSE` and corresponding
 project metadata.
 
-The `solo` profile removes the project-level MIT declaration and renames the
-boilerplate license to `THIRD_PARTY_NOTICES.md`. That notice records the origin
-of the reusable baseline; it is not a public license declaration for the new
+<!-- template-profile:collaborative:end -->
+
+When `THIRD_PARTY_NOTICES.md` is present, it records the origin and license of
+the reusable baseline; it is not a license declaration for the derived
 project.
 
 Apply any company or project license policy deliberately. Do not delete
@@ -76,8 +84,8 @@ third-party notices merely because the repository is private.
 
 ## Git Identity and Signing
 
-GitHub **Use this template** creates an independent repository, so deleting or
-reinitializing `.git` is unnecessary.
+A repository created from this template already has independent Git metadata,
+so deleting or reinitializing `.git` is unnecessary.
 
 Inspect the effective configuration:
 
@@ -133,11 +141,11 @@ Files matching `*convention*.mdc` are local personal conventions and are
 ignored by the repository. Shared company or project rules should use semantic
 names and be reviewed like other repository policy.
 
-Profile selection MUST NOT change `AGENTS.md`, `.agents/`, or `.cursor/`.
+Project initialization MUST NOT change `AGENTS.md`, `.agents/`, or `.cursor/`.
 
 ## Completion Checklist
 
-- The intended profile has been applied or validated.
+- Repository initialization is complete.
 - Project name, description, authors, and package placeholders are updated.
 - Python support declarations are internally consistent.
 - `docs/project/definition.md` contains the confirmed initial context.

@@ -18,6 +18,8 @@ preferred local interpreter.
 Node.js is not a project prerequisite. pre-commit provisions the Node runtime
 needed by the configured Markdown hook.
 
+<!-- template-profile:collaborative:start -->
+
 ## Create the Repository
 
 Use GitHub's **Use this template** action for an independent project. This
@@ -63,6 +65,8 @@ uv run python scripts/setup_profile.py collaborative
 
 The command is non-destructive for a complete collaborative repository.
 
+<!-- template-profile:collaborative:end -->
+
 ## Create the Environment
 
 Synchronize the locked development environment:
@@ -105,4 +109,4 @@ Before application implementation begins:
    enough information for the next milestone.
 
 The working agreement in `AGENTS.md` and the Agent Skills under `.agents/`
-remain identical in both profiles.
+remain part of the reusable project baseline.

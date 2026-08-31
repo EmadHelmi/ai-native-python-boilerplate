@@ -16,7 +16,7 @@ concurrency:
 env:
   UV_LOCKED: "1"
   UV_NO_PROGRESS: "1"
-  UV_VERSION: "0.12.5"
+  UV_VERSION: "0.12.7"
 
 jobs:
   quality:

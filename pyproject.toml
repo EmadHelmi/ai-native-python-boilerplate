@@ -1,6 +1,6 @@
 [project]
 name = "ai-native-python-project-boilerplate"
-version = "0.1.0"
+version = "1.0.0"
 description = "A production-oriented Python project boilerplate with modern tooling and human-controlled AI-agent workflows."
 readme = "README.md"
 requires-python = ">=3.13"
@@ -469,7 +469,11 @@ show_missing = true
 
 [tool.markdownlint-cli2]
 globs = ["**/*.{md,mdc}"]
-ignores = [".venv/**", "**/node_modules/**"]
+ignores = [
+    ".venv/**",
+    "**/node_modules/**",
+    "THIRD_PARTY_NOTICES.md",
+]
 
 [tool.markdownlint-cli2.config]
 MD013 = { line_length = 120, code_blocks = false, tables = false }
