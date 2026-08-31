@@ -3,8 +3,11 @@
 A production-oriented Python baseline with modern quality tooling, reusable
 engineering rules, and human-controlled AI-agent workflows.
 
-Use it to start an independent Python project or contribute improvements back
-to the shared boilerplate.
+Use it to start an independent Python project.
+
+<!-- template-profile:collaborative:start -->
+
+Contributions that improve the shared boilerplate are welcome.
 
 ## Choose Your Path
 
@@ -23,8 +26,6 @@ uv run python scripts/setup_profile.py solo --apply
 `solo` removes public GitHub collaboration infrastructure and the project-level
 MIT declaration. It preserves all Agent Skills, engineering Rules, local hooks,
 and quality tooling.
-
-<!-- template-profile:collaborative:start -->
 
 [![CI](https://github.com/EmadHelmi/ai-native-python-boilerplate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/EmadHelmi/ai-native-python-boilerplate/actions/workflows/ci.yml)
 [![Python 3.13 and 3.14](https://img.shields.io/badge/Python-3.13%20%7C%203.14-3776AB?logo=python&logoColor=white)](https://www.python.org/)
@@ -49,10 +50,10 @@ described by [Support](SUPPORT.md); vulnerabilities must follow the private
 reporting process in [Security](SECURITY.md). Participation is governed by the
 [Code of Conduct](CODE_OF_CONDUCT.md).
 
-<!-- template-profile:collaborative:end -->
-
 The detailed profile and setup flow is documented in
 [Getting Started](docs/getting-started.md).
+
+<!-- template-profile:collaborative:end -->
 
 ## Quick Start
 
@@ -79,9 +80,14 @@ uv manages `.venv` and runs project tools without requiring manual activation.
 - Agent Skills for project startup, technical decisions, implementation, and
   verification;
 - project-definition and Architecture Decision Record foundations;
-- Cursor integration with deterministic shell-command guardrails;
+- Cursor integration with deterministic shell-command guardrails.
+
+<!-- template-profile:collaborative:start -->
+
 - public contribution and repository automation in the `collaborative`
   profile.
+
+<!-- template-profile:collaborative:end -->
 
 The boilerplate intentionally does not prescribe application architecture,
 framework dependencies, infrastructure, or product requirements before a real
@@ -104,7 +110,7 @@ decisions, and workflow permissions do not silently redefine one another.
 ## Documentation Map
 
 - [Documentation index](docs/README.md) — task-oriented navigation;
-- [Getting Started](docs/getting-started.md) — profile selection and first
+- [Getting Started](docs/getting-started.md) — environment setup and first
   local verification;
 - [Customizing the Template](docs/customizing-the-template.md) — project
   identity, package placeholders, Git, Python, and licensing;
@@ -148,5 +154,5 @@ The repository workflow keeps these boundaries distinct:
 DISCUSS → DECIDE → RECORD → PLAN → APPROVE → IMPLEMENT → VERIFY → REVIEW
 ```
 
-Read `AGENTS.md` for the complete working agreement. Profile selection never
-changes Agent or Rule behavior.
+Read `AGENTS.md` for the complete working agreement. Project initialization
+never changes Agent or Rule behavior.

@@ -21,7 +21,19 @@ PROJECT_URLS_HEADER: Final = "[project.urls]"
 COLLABORATIVE_COVERAGE_SOURCE: Final = (
     'source = [".cursor/hooks", ".github/scripts", "scripts"]'
 )
-SOLO_COVERAGE_SOURCE: Final = 'source = [".cursor/hooks", "scripts"]'
+SOLO_COVERAGE_SOURCE: Final = 'source = [".cursor/hooks"]'
+
+SOLO_TRANSFORM_PATHS: Final = (
+    Path("README.md"),
+    Path("docs/getting-started.md"),
+    Path("docs/customizing-the-template.md"),
+    Path("docs/development-tooling.md"),
+)
+DECISION_REGISTER_PATH: Final = Path("docs/project/decisions/README.md")
+TEMPLATE_PROFILE_ADR_ENTRY: Final = (
+    "| [ADR-0001](0001-template-usage-profiles.md) "
+    "| Template Usage Profiles | Accepted |\n"
+)
 
 CORE_PATHS: Final = (
     Path("AGENTS.md"),
@@ -30,6 +42,8 @@ CORE_PATHS: Final = (
     Path("README.md"),
     Path("pyproject.toml"),
     Path("scripts/setup_profile.py"),
+    *SOLO_TRANSFORM_PATHS[1:],
+    DECISION_REGISTER_PATH,
 )
 
 SOLO_REMOVE_PATHS: Final = (
@@ -41,6 +55,9 @@ SOLO_REMOVE_PATHS: Final = (
     Path("SUPPORT.md"),
     Path("tests/test_pr_policy.py"),
     Path("tests/test_repository_publication.py"),
+    Path("tests/test_template_profiles.py"),
+    Path("docs/project/decisions/0001-template-usage-profiles.md"),
+    Path("scripts/setup_profile.py"),
 )
 
 LICENSE_PATH: Final = Path("LICENSE")
@@ -166,21 +183,35 @@ def _solo_pyproject_content(path: Path) -> str:
     return content
 
 
-def _solo_readme_content(path: Path) -> str:
+def _without_collaborative_sections(path: Path) -> str:
+    """Remove every explicitly marked collaborative-only text section."""
+
     content = _read_text(path)
     start_count = content.count(COLLABORATIVE_MARKER_START)
     end_count = content.count(COLLABORATIVE_MARKER_END)
 
-    if (start_count, end_count) == (0, 0):
-        return content
-    if (start_count, end_count) != (1, 1):
+    if start_count == 0 or start_count != end_count:
         raise ProfileSetupError(
-            "Collaborative README markers are incomplete or ambiguous."
+            f"Collaborative markers in {path} are incomplete or ambiguous."
         )
 
-    before, marked_and_after = content.split(COLLABORATIVE_MARKER_START, 1)
-    _, after = marked_and_after.split(COLLABORATIVE_MARKER_END, 1)
-    return f"{before.rstrip()}\n\n{after.lstrip()}"
+    for _ in range(start_count):
+        before, marked_and_after = content.split(
+            COLLABORATIVE_MARKER_START,
+            1,
+        )
+        _, after = marked_and_after.split(COLLABORATIVE_MARKER_END, 1)
+        content = f"{before.rstrip()}\n\n{after.lstrip()}"
+    return content
+
+
+def _solo_decision_register_content(path: Path) -> str:
+    content = _read_text(path)
+    if content.count(TEMPLATE_PROFILE_ADR_ENTRY) != 1:
+        raise ProfileSetupError(
+            "Template-profile ADR register entry is missing or ambiguous."
+        )
+    return content.replace(TEMPLATE_PROFILE_ADR_ENTRY, "", 1)
 
 
 def _validate_collaborative(root: Path) -> None:
@@ -210,6 +241,9 @@ def _validate_collaborative(root: Path) -> None:
             "Collaborative public project URLs are missing from "
             "pyproject.toml."
         )
+    for relative_path in SOLO_TRANSFORM_PATHS:
+        _without_collaborative_sections(root / relative_path)
+    _solo_decision_register_content(root / DECISION_REGISTER_PATH)
 
 
 def planned_actions(root: Path, profile: Profile) -> tuple[str, ...]:
@@ -228,9 +262,10 @@ def planned_actions(root: Path, profile: Profile) -> tuple[str, ...]:
         return ()
 
     pyproject = resolved_root / "pyproject.toml"
-    readme = resolved_root / "README.md"
     _solo_pyproject_content(pyproject)
-    _solo_readme_content(readme)
+    for relative_path in SOLO_TRANSFORM_PATHS:
+        _without_collaborative_sections(resolved_root / relative_path)
+    _solo_decision_register_content(resolved_root / DECISION_REGISTER_PATH)
 
     if current_profile == "solo":
         unexpected = [
@@ -254,7 +289,7 @@ def planned_actions(root: Path, profile: Profile) -> tuple[str, ...]:
         (
             "rename LICENSE to THIRD_PARTY_NOTICES.md",
             "remove MIT and public project metadata from pyproject.toml",
-            "remove collaborative coverage and README references",
+            "remove collaborative coverage and documentation references",
         )
     )
     return tuple(actions)
@@ -286,12 +321,20 @@ def apply_profile(root: Path, profile: Profile) -> tuple[str, ...]:
 
     resolved_root = root.resolve()
     pyproject_path = resolved_root / "pyproject.toml"
-    readme_path = resolved_root / "README.md"
     pyproject_content = _solo_pyproject_content(pyproject_path)
-    readme_content = _solo_readme_content(readme_path)
+    transformed_content = {
+        relative_path: _without_collaborative_sections(
+            resolved_root / relative_path
+        )
+        for relative_path in SOLO_TRANSFORM_PATHS
+    }
+    transformed_content[DECISION_REGISTER_PATH] = (
+        _solo_decision_register_content(resolved_root / DECISION_REGISTER_PATH)
+    )
 
     _write_text(pyproject_path, pyproject_content)
-    _write_text(readme_path, readme_content)
+    for relative_path, content in transformed_content.items():
+        _write_text(resolved_root / relative_path, content)
     for relative_path in SOLO_REMOVE_PATHS:
         _remove_exact_path(resolved_root / relative_path)
 

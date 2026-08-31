@@ -12,6 +12,8 @@ after the initial publication.
 - Template repository: enabled.
 - Issues: enabled.
 - Wiki: disabled.
+- Topics: `python`, `python-boilerplate`, `project-template`, `uv`, `ruff`,
+  `pyright`, `pytest`, and `ai-agents`.
 - Merge method: squash only.
 - Default squash commit title: pull-request title.
 - Default squash commit message: pull-request body.
@@ -60,9 +62,15 @@ by the owner.
 - Private vulnerability reporting: enabled.
 - Secret scanning: enabled.
 - Push protection for secrets: enabled.
+- CodeQL default setup: enabled for Python on this canonical public GitHub
+  repository.
 
 Scheduled version updates remain defined in `dependabot.yml`. Vulnerabilities
 must be reported through the private path in the root `SECURITY.md`.
+
+CodeQL default setup is a setting of the canonical GitHub repository. It does
+not add reusable workflow files to the boilerplate and is not inherited by
+repositories created from the template or hosted on GitLab.
 
 ## Publication Verification
 
@@ -74,4 +82,5 @@ After applying these settings:
 4. open a test pull request and confirm all four required checks run;
 5. confirm an external contributor cannot merge or push to `main`;
 6. confirm the security reporting form is available;
-7. compare the live settings with this document and the ruleset JSON.
+7. confirm the documented topics and CodeQL default setup are active;
+8. compare the live settings with this document and the ruleset JSON.

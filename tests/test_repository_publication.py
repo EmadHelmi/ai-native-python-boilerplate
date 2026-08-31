@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import tomllib
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,13 @@ REQUIRED_CHECKS = {
     "Review dependency changes",
     "Validate metadata",
 }
+UV_VERSION_PATTERN = re.compile(
+    r'^\s*UV_VERSION:\s*"(?P<version>[^\"]+)"$', re.MULTILINE
+)
+UV_HOOK_PATTERN = re.compile(
+    r"repo: https://github\.com/astral-sh/uv-pre-commit\s+"
+    r"rev: (?P<version>\S+)",
+)
 
 
 def load_ruleset() -> dict[str, Any]:
@@ -23,6 +31,28 @@ def load_ruleset() -> dict[str, Any]:
 
     path = PROJECT_ROOT / ".github" / "rulesets" / "main.json"
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _required_match(pattern: re.Pattern[str], content: str) -> str:
+    match = pattern.search(content)
+    assert match is not None
+    return match.group("version")
+
+
+def test_uv_runtime_and_lock_hook_versions_match() -> None:
+    """Prevent the CI uv runtime from drifting behind the lock hook."""
+
+    workflow = (PROJECT_ROOT / ".github/workflows/ci.yml").read_text(
+        encoding="utf-8"
+    )
+    hooks = (PROJECT_ROOT / ".pre-commit-config.yaml").read_text(
+        encoding="utf-8"
+    )
+
+    assert _required_match(UV_VERSION_PATTERN, workflow) == _required_match(
+        UV_HOOK_PATTERN,
+        hooks,
+    )
 
 
 def rules_by_type(ruleset: dict[str, Any]) -> dict[str, dict[str, Any]]:
