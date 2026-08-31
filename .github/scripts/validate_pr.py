@@ -15,7 +15,7 @@ TITLE_PATTERN = re.compile(
     r"(?:\([a-z0-9][a-z0-9._/-]*\))?!?: [^\s].*$"
 )
 REQUIRED_SECTIONS = ("Summary", "Motivation", "Testing", "Checklist")
-AUTOMATED_ACTORS = frozenset({"dependabot[bot]"})
+AUTOMATED_AUTHORS = frozenset({"dependabot[bot]"})
 HTML_COMMENT_PATTERN = re.compile(r"<!--.*?-->", re.DOTALL)
 UNCHECKED_ITEM_PATTERN = re.compile(r"^\s*-\s*\[\s\]", re.MULTILINE)
 CHECKED_ITEM_PATTERN = re.compile(r"^\s*-\s*\[[xX]\]", re.MULTILINE)
@@ -109,29 +109,30 @@ def validate_body(body: str) -> list[str]:
 
 
 def read_event(event_path: Path) -> tuple[str, str, str]:
-    """Read title, body, and actor from a GitHub pull-request event."""
+    """Read title, body, and author from a GitHub pull-request event."""
 
     event: dict[str, Any] = json.loads(event_path.read_text(encoding="utf-8"))
     pull_request = event.get("pull_request")
-    sender = event.get("sender")
 
     if not isinstance(pull_request, dict):
         raise TypeError("The event does not contain pull_request metadata.")
-    if not isinstance(sender, dict):
-        raise TypeError("The event does not contain sender metadata.")
+
+    user = pull_request.get("user")
+    if not isinstance(user, dict):
+        raise TypeError("The pull request does not contain author metadata.")
 
     title = pull_request.get("title")
     body = pull_request.get("body") or ""
-    actor = sender.get("login")
+    author = user.get("login")
 
     if not isinstance(title, str):
         raise TypeError("The pull-request title must be a string.")
     if not isinstance(body, str):
         raise TypeError("The pull-request body must be a string.")
-    if not isinstance(actor, str):
-        raise TypeError("The pull-request actor must be a string.")
+    if not isinstance(author, str):
+        raise TypeError("The pull-request author must be a string.")
 
-    return title, body, actor
+    return title, body, author
 
 
 def main() -> int:
@@ -143,13 +144,13 @@ def main() -> int:
         return 1
 
     try:
-        title, body, actor = read_event(Path(event_path_value))
+        title, body, author = read_event(Path(event_path_value))
     except (OSError, json.JSONDecodeError, TypeError) as exc:
         print(f"PR policy: unable to read the event: {exc}", file=sys.stderr)
         return 1
 
     errors = validate_title(title)
-    if actor not in AUTOMATED_ACTORS:
+    if author not in AUTOMATED_AUTHORS:
         errors.extend(validate_body(body))
 
     if errors:
