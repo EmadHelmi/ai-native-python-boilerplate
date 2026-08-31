@@ -150,15 +150,20 @@ def write_event(
     *,
     title: object = "docs: improve contribution guidance",
     body: object = VALID_BODY,
-    actor: object = "contributor",
+    author: object = "contributor",
+    sender: object = "contributor",
 ) -> None:
     """Write representative GitHub pull-request event data."""
 
     path.write_text(
         json.dumps(
             {
-                "pull_request": {"title": title, "body": body},
-                "sender": {"login": actor},
+                "pull_request": {
+                    "title": title,
+                    "body": body,
+                    "user": {"login": author},
+                },
+                "sender": {"login": sender},
             }
         ),
         encoding="utf-8",
@@ -178,11 +183,11 @@ def test_read_event_rejects_missing_metadata(
         validator.read_event(event_path)
 
 
-def test_read_event_rejects_missing_sender(
+def test_read_event_rejects_missing_author(
     validator: ModuleType,
     tmp_path: Path,
 ) -> None:
-    """Reject events without sender metadata."""
+    """Reject events without pull-request author metadata."""
 
     event_path = tmp_path / "event.json"
     event_path.write_text(
@@ -190,7 +195,7 @@ def test_read_event_rejects_missing_sender(
         encoding="utf-8",
     )
 
-    with pytest.raises(TypeError, match="sender"):
+    with pytest.raises(TypeError, match="author"):
         validator.read_event(event_path)
 
 
@@ -199,7 +204,7 @@ def test_read_event_rejects_missing_sender(
     [
         ("title", 42, "title"),
         ("body", 42, "body"),
-        ("actor", 42, "actor"),
+        ("author", 42, "author"),
     ],
 )
 def test_read_event_rejects_invalid_field_types(
@@ -215,7 +220,7 @@ def test_read_event_rejects_invalid_field_types(
     values: dict[str, object] = {
         "title": "fix: valid",
         "body": "body",
-        "actor": "contributor",
+        "author": "contributor",
     }
     values[field] = value
     write_event(event_path, **values)
@@ -245,18 +250,38 @@ def test_main_allows_dependabot_generated_body(
     tmp_path: Path,
     monkeypatch: MonkeyPatch,
 ) -> None:
-    """Exempt trusted dependency automation from the body template."""
+    """Exempt a Dependabot PR even when a maintainer triggers the event."""
 
     event_path = tmp_path / "event.json"
     write_event(
         event_path,
         title="build(deps): update development dependencies",
         body="Dependabot-generated update.",
-        actor="dependabot[bot]",
+        author="dependabot[bot]",
+        sender="EmadHelmi",
     )
     monkeypatch.setenv("GITHUB_EVENT_PATH", str(event_path))
 
     assert validator.main() == 0
+
+
+def test_main_does_not_exempt_human_pr_updated_by_automation(
+    validator: ModuleType,
+    tmp_path: Path,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    """Keep the body policy for human PRs regardless of the event sender."""
+
+    event_path = tmp_path / "event.json"
+    write_event(
+        event_path,
+        body="Missing the required sections.",
+        author="contributor",
+        sender="dependabot[bot]",
+    )
+    monkeypatch.setenv("GITHUB_EVENT_PATH", str(event_path))
+
+    assert validator.main() == 1
 
 
 def test_main_rejects_invalid_event(
